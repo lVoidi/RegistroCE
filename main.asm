@@ -15,7 +15,8 @@ msg4        db 13,10,'[Stub] Ordenar calificaciones seleccionado.',13,10,'$'
 pressAny    db 'Presione cualquier tecla para volver al menu...',13,10,'$'
 
 .CODE
-EXTRN Menu_Print:NEAR, Menu_ReadChoice:NEAR   ; Importa rutinas del menu
+include menu.asm
+;EXTRN Menu_Print:NEAR, Menu_ReadChoice:NEAR   ; Importa rutinas del menu
 
 start:
     ; Inicializa el segmento de datos
