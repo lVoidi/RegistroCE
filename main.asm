@@ -10,6 +10,7 @@ Buscar         db '3) Buscar estudiante por indice.',13,10,'$'
 Ordenar        db '4) Ordenar calificaciones.',13,10,'$'
 Salir          db '5) Salir.',13,10,'$'
 msgInvalid     db 13,10,'Entrada Invalida',13,10,'$'
+msg1           db 13,10,'Ingresar calificaciones',13,10,'$'
 msg2           db 13,10,'Promedio: Maxima: Minima: Aprobados: Reprobados$',13,10
 msg3           db 13,10,'Indice$',13,10
 msg4           db 13,10,'Calicifaciones$',13,10
@@ -38,7 +39,8 @@ MainLoop:
 opcion1:
     ;Estamos dentro de una funcion (al presionar 5 nos devolvemos 
     ;al menu (igual para 2, 3, 4))
-    mov inMenu, 0
+    mov inMenu, 0 
+    mov dx, OFFSET msg1
     mov ah, 09h
     int 21h
     ; Este loop espera la entrada del usuario para retornarlo al menu
