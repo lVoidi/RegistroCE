@@ -1,7 +1,3 @@
-; ============================================================
-; main.asm — Punto de entrada. Llama al menu y despacha opciones.
-; Incluye menu.asm directamente.
-; ============================================================
 
 .MODEL SMALL
 .STACK 100h
@@ -11,10 +7,13 @@ msg1        db 13,10,'[Stub] Ingresar calificaciones seleccionado.',13,10,'$'
 msg2        db 13,10,'[Stub] Mostrar estadisticas seleccionado.',13,10,'$'
 msg3        db 13,10,'[Stub] Buscar estudiante por indice seleccionado.',13,10,'$'
 msg4        db 13,10,'[Stub] Ordenar calificaciones seleccionado.',13,10,'$'
-pressAny    db 'Presione cualquier tecla para volver al menu...',13,10,'$'
+pressAny    db 13,10,'Presione cualquier tecla para volver al menu...',13,10,'$'
 
 .CODE
-INCLUDE menu.asm
+
+extern Menu_Print:NEAR
+extern Menu_ReadChoice:NEAR
+extern Buscar_Estudiante:NEAR
 
 start:
     mov  ax, @DATA
@@ -52,6 +51,7 @@ Opt3:
     mov  dx, OFFSET msg3
     mov  ah, 09h
     int  21h
+    call Buscar_Estudiante
     jmp  WaitAndReturn
 
 Opt4:
@@ -75,3 +75,4 @@ ExitProgram:
     int  21h
 
 END start
+
