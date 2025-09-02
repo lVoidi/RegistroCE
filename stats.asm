@@ -106,7 +106,7 @@ start:
 
     ; --- Ejecutar calculos estadisticos ---
     call Stats_CalcularMaxMin
-    ; call Stats_CalcularPromedio ; El promedio aun no se implementa completamente
+    call Stats_CalcularPromedio ; Ahora el promedio está implementado completamente
     call Stats_ContarAprobadosReprobados
     ; --- Fin del programa de prueba ---
     mov ah, 4Ch
@@ -210,7 +210,7 @@ Stats_CalcularPromedio PROC
     ; Guardar numero de estudiantes para la division
     mov bx, cx
 
-    ; Sumador de 64 bits (en BX:CX:DX:AX) - usaremos solo 32 bits por ahora
+    ; Sumador de 32 bits: DX:AX acumulador
     xor ax, ax
     xor dx, dx
     
@@ -225,11 +225,16 @@ Promedio_Loop:
     add si, TAM_REGISTRO
     loop Promedio_Loop
 
-    ; DX:AX contiene la suma total. 
-    ; AQUI IRIA UNA RUTINA DE DIVISION 32-bits / 16-bits.
-    ; Por ahora, dejamos la suma en promedioGeneral para verificar.
-    ; div bx ; Esto daria un error de overflow porque el cociente no cabe en AX
-    
+    ; Guardar suma total en promedioGeneral temporalmente
+    mov [promedioGeneral], ax
+    mov [promedioGeneral+2], dx
+
+    ; Cargar la suma (dividendo) en DX:AX y dividir por BX (número estudiantes)
+    mov ax, [promedioGeneral]
+    mov dx, [promedioGeneral+2]
+    call Div32By16    ; Regresa cociente en DX:AX
+
+    ; Guardar promedio (resultado de división) en la variable
     mov [promedioGeneral], ax
     mov [promedioGeneral+2], dx
 
@@ -241,6 +246,61 @@ Promedio_End:
     pop ax
     ret
 Stats_CalcularPromedio ENDP
+
+; ------------------------------------------------------------
+; Div32By16: Rutina para dividir un operando de 32 bits (DX:AX)
+; entre un divisor de 16 bits (BX) y obtener un cociente de 32 bits.
+; Entrada:
+;    Dividendo: DX:AX
+;    Divisor: BX
+; Salida:
+;    Cociente en DX:AX
+; ------------------------------------------------------------
+Div32By16 PROC
+    push cx
+    push si
+    push di
+    push bp
+
+    ; Inicializar el cociente (32 bits) en DI:SI y el resto (16 bits) en BP.
+    xor di, di      ; Cociente alto = 0
+    xor si, si      ; Cociente bajo = 0
+    xor bp, bp      ; Resto = 0
+
+    mov cx, 32      ; Número de iteraciones = 32 bits
+
+DivLoop:
+    ; Desplazar el cociente a la izquierda para dejar lugar a un bit
+    shl si, 1
+    rcl di, 1
+
+    ; Desplazar el dividendo (DX:AX) a la izquierda; el bit más
+    ; significativo se coloca en CF.
+    shl ax, 1
+    rcl dx, 1
+
+    ; Desplazar el resto (BP) a la izquierda e incorporar CF en LSB.
+    rcl bp, 1
+
+    ; Si el resto es mayor o igual que el divisor, se resta y se
+    ; fija el bit menos significativo del cociente.
+    cmp bp, bx
+    jb NoSub
+    sub bp, bx
+    inc si          ; Fija el LSB del cociente
+NoSub:
+    loop DivLoop
+
+    ; Mover el cociente (almacenado en DI:SI) a DX:AX (resultado)
+    mov ax, si
+    mov dx, di
+
+    pop bp
+    pop di
+    pop si
+    pop cx
+    ret
+Div32By16 ENDP
 
 ; ------------------------------------------------------------
 ; Stats_ContarAprobadosReprobados: Cuenta aprobados y reprobados.
