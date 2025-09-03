@@ -19,7 +19,7 @@ TAM_REGISTRO    EQU 70  ; Actualizado: +2 bytes para almacenamiento separado
 TAM_NOMBRE      EQU 21
 TAM_APELLIDO1   EQU 21
 TAM_APELLIDO2   EQU 21
-OFFSET_NOTA     EQU TAM_NOMBRE + TAM_APELLIDO1 + TAM_APELLIDO2 ; 63
+OFFSET_NOTA     EQU 63  ; TAM_NOMBRE + TAM_APELLIDO1 + TAM_APELLIDO2 = 21+21+21 = 63
 
 ; Definir estructura para almacenamiento de notas separadas
 NOTA_INT_SIZE   EQU 2   ; DW para parte entera (0-100)
@@ -30,59 +30,59 @@ NumEstudiantesRegistrados DB 5
 
 EstudiantesData:
     ; Estudiante 1: Nota 85.12345
-    DB 'Juan$'
-    DB 16 DUP(0)
-    DB 'Perez$'
-    DB 15 DUP(0)
-    DB 'Lopez$'
-    DB 15 DUP(0)
-    DW 85           ; Parte entera
-    DD 12345        ; Parte decimal
-    DB 0 ; Padding
+    DB 'Juan$'             ; 5 bytes
+    DB 16 DUP(0)           ; 16 bytes -> Total: 21 bytes
+    DB 'Perez$'            ; 6 bytes  
+    DB 15 DUP(0)           ; 15 bytes -> Total: 21 bytes
+    DB 'Lopez$'            ; 6 bytes
+    DB 15 DUP(0)           ; 15 bytes -> Total: 21 bytes
+    DW 85                  ; 2 bytes - Parte entera
+    DD 12345               ; 4 bytes - Parte decimal
+    DB 0                   ; 1 byte - Padding -> Total registro: 70 bytes
 
     ; Estudiante 2: Nota 69.99999 (Reprobado)
-    DB 'Maria$'
-    DB 15 DUP(0)
-    DB 'Gomez$'
-    DB 15 DUP(0)
-    DB 'Ruiz$'
-    DB 16 DUP(0)
-    DW 69           ; Parte entera
-    DD 99999        ; Parte decimal
-    DB 0 ; Padding
+    DB 'Maria$'            ; 6 bytes
+    DB 15 DUP(0)           ; 15 bytes -> Total: 21 bytes
+    DB 'Gomez$'            ; 6 bytes
+    DB 15 DUP(0)           ; 15 bytes -> Total: 21 bytes
+    DB 'Ruiz$'             ; 5 bytes
+    DB 16 DUP(0)           ; 16 bytes -> Total: 21 bytes
+    DW 69                  ; 2 bytes - Parte entera
+    DD 99999               ; 4 bytes - Parte decimal
+    DB 0                   ; 1 byte - Padding -> Total registro: 70 bytes
 
     ; Estudiante 3: Nota 95.00000 (Maxima)
-    DB 'Carlos$'
-    DB 14 DUP(0)
-    DB 'Sanchez$'
-    DB 13 DUP(0)
-    DB 'Diaz$'
-    DB 16 DUP(0)
-    DW 95           ; Parte entera
-    DD 0            ; Parte decimal
-    DB 0 ; Padding
+    DB 'Carlos$'           ; 7 bytes
+    DB 14 DUP(0)           ; 14 bytes -> Total: 21 bytes
+    DB 'Sanchez$'          ; 8 bytes
+    DB 13 DUP(0)           ; 13 bytes -> Total: 21 bytes
+    DB 'Diaz$'             ; 5 bytes
+    DB 16 DUP(0)           ; 16 bytes -> Total: 21 bytes
+    DW 95                  ; 2 bytes - Parte entera
+    DD 0                   ; 4 bytes - Parte decimal
+    DB 0                   ; 1 byte - Padding -> Total registro: 70 bytes
 
     ; Estudiante 4: Nota 50.50000 (Minima)
-    DB 'Ana$'
-    DB 17 DUP(0)
-    DB 'Martinez$'
-    DB 12 DUP(0)
-    DB 'Soto$'
-    DB 16 DUP(0)
-    DW 50           ; Parte entera
-    DD 50000        ; Parte decimal
-    DB 0 ; Padding
+    DB 'Ana$'              ; 4 bytes
+    DB 17 DUP(0)           ; 17 bytes -> Total: 21 bytes
+    DB 'Martinez$'         ; 9 bytes
+    DB 12 DUP(0)           ; 12 bytes -> Total: 21 bytes
+    DB 'Soto$'             ; 5 bytes
+    DB 16 DUP(0)           ; 16 bytes -> Total: 21 bytes
+    DW 50                  ; 2 bytes - Parte entera
+    DD 50000               ; 4 bytes - Parte decimal
+    DB 0                   ; 1 byte - Padding -> Total registro: 70 bytes
 
     ; Estudiante 5: Nota 70.00000 (Aprobado)
-    DB 'Luis$'
-    DB 16 DUP(0)
-    DB 'Hernandez$'
-    DB 11 DUP(0)
-    DB 'Vega$'
-    DB 16 DUP(0)
-    DW 70           ; Parte entera
-    DD 0            ; Parte decimal
-    DB 0 ; Padding
+    DB 'Luis$'             ; 5 bytes
+    DB 16 DUP(0)           ; 16 bytes -> Total: 21 bytes
+    DB 'Hernandez$'        ; 10 bytes
+    DB 11 DUP(0)           ; 11 bytes -> Total: 21 bytes
+    DB 'Vega$'             ; 5 bytes
+    DB 16 DUP(0)           ; 16 bytes -> Total: 21 bytes
+    DW 70                  ; 2 bytes - Parte entera
+    DD 0                   ; 4 bytes - Parte decimal
+    DB 0                   ; 1 byte - Padding -> Total registro: 70 bytes
 
 ; --- Variables para almacenar resultados ---
 notaMaxima      DW 0    ; Parte entera
@@ -97,9 +97,13 @@ reprobados      DW 0
 ; --- Mensajes para la salida ---
 msgMaxima       DB 13, 10, 'Nota Maxima: $'
 msgMinima       DB 13, 10, 'Nota Minima: $'
+msgPromedio     DB 13, 10, 'Promedio: $'
 msgAprobados    DB 13, 10, 'Aprobados: $'
 msgReprobados   DB 13, 10, 'Reprobados: $'
 newLine         DB 13, 10, '$'
+
+; --- Variables temporales ---
+temp_decimal    DD 0
 
 ; --- Constantes ---
 NOTA_APROBACION     DW 70       ; Parte entera de nota de aprobación
@@ -116,9 +120,15 @@ start:
     mov ds, ax
 
     ; --- Ejecutar calculos estadisticos ---
+    call DebugEstudiantes  ; Nueva función de debug
+    call DebugDirecto      ; Acceso directo a cada nota
     call Stats_CalcularMaxMin
     call Stats_CalcularPromedio ; Ahora el promedio está implementado completamente
     call Stats_ContarAprobadosReprobados
+    
+    ; --- Imprimir resultados ---
+    call ImprimirResultados
+    
     ; --- Fin del programa de prueba ---
     mov ah, 4Ch
     int 21h
@@ -126,6 +136,159 @@ start:
 ; ============================================================
 ;   SUBRUTINAS DE CALCULO ESTADISTICO
 ; ============================================================
+
+; ------------------------------------------------------------
+; DebugEstudiantes: Imprime todas las notas para verificar acceso
+; ------------------------------------------------------------
+DebugEstudiantes PROC
+    push ax
+    push bx
+    push cx
+    push dx
+    push si
+    
+    ; Imprimir el OFFSET_NOTA primero
+    mov dl, 'O'
+    mov ah, 02h
+    int 21h
+    mov dl, ':'
+    mov ah, 02h
+    int 21h
+    mov ax, OFFSET_NOTA
+    call ImprimirNumero
+    mov dl, ' '
+    mov ah, 02h
+    int 21h
+    
+    ; Imprimir TAM_REGISTRO
+    mov dl, 'T'
+    mov ah, 02h
+    int 21h
+    mov dl, ':'
+    mov ah, 02h
+    int 21h
+    mov ax, TAM_REGISTRO
+    call ImprimirNumero
+    mov dx, OFFSET newLine
+    mov ah, 09h
+    int 21h
+    
+    mov cl, [NumEstudiantesRegistrados]
+    xor ch, ch
+    
+    mov si, OFFSET EstudiantesData
+    add si, OFFSET_NOTA
+    
+    mov dl, 'N'
+    mov ah, 02h
+    int 21h
+    mov dl, ':'
+    mov ah, 02h
+    int 21h
+    
+DebugLoop:
+    ; Imprimir offset actual
+    mov dl, '['
+    mov ah, 02h
+    int 21h
+    mov ax, si
+    call ImprimirNumero
+    mov dl, ']'
+    mov ah, 02h
+    int 21h
+    
+    ; Imprimir parte entera
+    mov ax, [si]
+    call ImprimirNumero
+    
+    mov dl, '.'
+    mov ah, 02h
+    int 21h
+    
+    ; Imprimir parte decimal
+    mov ax, [si+2]
+    call ImprimirDecimal
+    
+    mov dl, ' '
+    mov ah, 02h
+    int 21h
+    
+    add si, TAM_REGISTRO
+    loop DebugLoop
+    
+    mov dx, OFFSET newLine
+    mov ah, 09h
+    int 21h
+    
+    pop si
+    pop dx
+    pop cx
+    pop bx
+    pop ax
+    ret
+DebugEstudiantes ENDP
+
+; ------------------------------------------------------------
+; DebugDirecto: Accede directamente a cada nota sin bucles
+; ------------------------------------------------------------
+DebugDirecto PROC
+    push ax
+    push si
+    
+    mov dl, 'D'
+    mov ah, 02h
+    int 21h
+    mov dl, ':'
+    mov ah, 02h
+    int 21h
+    
+    ; Estudiante 1
+    mov si, OFFSET EstudiantesData
+    add si, 63      ; Hardcoded offset
+    mov ax, [si]
+    call ImprimirNumero
+    mov dl, '.'
+    mov ah, 02h
+    int 21h
+    mov ax, [si+2]
+    call ImprimirDecimal
+    mov dl, ' '
+    mov ah, 02h
+    int 21h
+    
+    ; Estudiante 2  
+    mov si, OFFSET EstudiantesData
+    add si, 133     ; 63 + 70 = 133
+    mov ax, [si]
+    call ImprimirNumero
+    mov dl, '.'
+    mov ah, 02h
+    int 21h
+    mov ax, [si+2]
+    call ImprimirDecimal
+    mov dl, ' '
+    mov ah, 02h
+    int 21h
+    
+    ; Estudiante 3
+    mov si, OFFSET EstudiantesData
+    add si, 203     ; 63 + 70*2 = 203
+    mov ax, [si]
+    call ImprimirNumero
+    mov dl, '.'
+    mov ah, 02h
+    int 21h
+    mov ax, [si+2]
+    call ImprimirDecimal
+    
+    mov dx, OFFSET newLine
+    mov ah, 09h
+    int 21h
+    
+    pop si
+    pop ax
+    ret
+DebugDirecto ENDP
 
 ; ------------------------------------------------------------
 ; Stats_CalcularMaxMin: Calcula la nota maxima y minima.
@@ -152,7 +315,7 @@ Stats_CalcularMaxMin PROC
     mov [notaMinima], ax
     
     mov ax, [si+2]                     ; Parte decimal (low word)
-    mov dx, [si+4]                     ; Parte decimal (high word)
+    mov dx, [si+4]                     ; Parte decimal (high word)  
     mov [notaMaxima_frac], ax
     mov [notaMaxima_frac+2], dx
     mov [notaMinima_frac], ax
@@ -409,6 +572,186 @@ Contar_End:
     pop ax
     ret
 Stats_ContarAprobadosReprobados ENDP
+
+; ------------------------------------------------------------
+; ImprimirResultados: Imprime todas las estadísticas calculadas
+; ------------------------------------------------------------
+ImprimirResultados PROC
+    push ax
+    push dx
+    
+    ; Imprimir nota máxima
+    mov dx, OFFSET msgMaxima
+    mov ah, 09h
+    int 21h
+    
+    mov ax, [notaMaxima]
+    call ImprimirNumero
+    
+    mov dl, '.'
+    mov ah, 02h
+    int 21h
+    
+    mov ax, [notaMaxima_frac]
+    ; No necesitamos dx ya que los valores son < 99999
+    call ImprimirDecimal
+    
+    ; Imprimir nota mínima
+    mov dx, OFFSET msgMinima
+    mov ah, 09h
+    int 21h
+    
+    mov ax, [notaMinima]
+    call ImprimirNumero
+    
+    mov dl, '.'
+    mov ah, 02h
+    int 21h
+    
+    mov ax, [notaMinima_frac]
+    ; No necesitamos dx ya que los valores son < 99999
+    call ImprimirDecimal
+    
+    ; Imprimir promedio
+    mov dx, OFFSET newLine
+    mov ah, 09h
+    int 21h
+    
+    mov dx, OFFSET msgPromedio
+    mov ah, 09h
+    int 21h
+    
+    mov ax, [promedioGeneral]
+    call ImprimirNumero
+    
+    mov dl, '.'
+    mov ah, 02h
+    int 21h
+    
+    mov ax, [promedio_frac]
+    ; No necesitamos dx ya que los valores son < 99999
+    call ImprimirDecimal
+    
+    ; Imprimir aprobados
+    mov dx, OFFSET msgAprobados
+    mov ah, 09h
+    int 21h
+    
+    mov ax, [aprobados]
+    call ImprimirNumero
+    
+    ; Imprimir reprobados
+    mov dx, OFFSET msgReprobados
+    mov ah, 09h
+    int 21h
+    
+    mov ax, [reprobados]
+    call ImprimirNumero
+    
+    mov dx, OFFSET newLine
+    mov ah, 09h
+    int 21h
+    
+    pop dx
+    pop ax
+    ret
+ImprimirResultados ENDP
+
+; ------------------------------------------------------------
+; ImprimirNumero: Imprime un número de 16 bits en decimal
+; Entrada: AX = número a imprimir
+; ------------------------------------------------------------
+ImprimirNumero PROC
+    push ax
+    push bx
+    push cx
+    push dx
+    
+    mov bx, 10
+    mov cx, 0
+    
+    ; Si el número es 0, imprimir directamente
+    cmp ax, 0
+    jne ConvertirLoop
+    mov dl, '0'
+    mov ah, 02h
+    int 21h
+    jmp ImprimirNum_End
+    
+ConvertirLoop:
+    cmp ax, 0
+    je ImprimirDigitos
+    
+    xor dx, dx
+    div bx          ; AX = cociente, DX = resto
+    
+    add dl, '0'     ; Convertir dígito a ASCII
+    push dx         ; Guardar dígito en stack
+    inc cx          ; Contar dígitos
+    
+    jmp ConvertirLoop
+    
+ImprimirDigitos:
+    cmp cx, 0
+    je ImprimirNum_End
+    
+    pop dx          ; Recuperar dígito
+    mov ah, 02h     ; Imprimir carácter
+    int 21h
+    
+    dec cx
+    jmp ImprimirDigitos
+    
+ImprimirNum_End:
+    pop dx
+    pop cx
+    pop bx
+    pop ax
+    ret
+ImprimirNumero ENDP
+
+; ------------------------------------------------------------
+; ImprimirDecimal: Imprime parte decimal (5 dígitos con ceros iniciales)
+; Entrada: DX:AX = número decimal a imprimir (máximo 99999)
+; ------------------------------------------------------------
+ImprimirDecimal PROC
+    push ax
+    push bx
+    push cx
+    push dx
+    
+    ; Solo necesitamos AX ya que el máximo es 99999 (cabe en 16 bits)
+    mov bx, 10
+    mov cx, 5       ; Exactamente 5 dígitos
+    
+    ; Stack para almacenar dígitos
+ImprimirDec_Loop:
+    xor dx, dx      ; Limpiar DX para división
+    div bx          ; AX = cociente, DX = resto
+    
+    add dl, '0'     ; Convertir resto a ASCII
+    push dx         ; Guardar dígito
+    
+    dec cx
+    cmp cx, 0
+    jg ImprimirDec_Loop
+    
+    ; Imprimir los 5 dígitos desde el stack
+    mov cx, 5
+ImprimirDec_Print:
+    pop dx
+    mov ah, 02h
+    int 21h
+    dec cx
+    cmp cx, 0
+    jg ImprimirDec_Print
+    
+    pop dx
+    pop cx
+    pop bx
+    pop ax
+    ret
+ImprimirDecimal ENDP
 
 ; ------------------------------------------------------------
 ; NormalizeGrade: Normaliza una nota si la parte decimal >= 100000
