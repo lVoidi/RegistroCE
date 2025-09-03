@@ -15,11 +15,15 @@ org 100h
 
 ; --- Definicion de la estructura (consistente con main.asm) ---
 MAX_ESTUDIANTES EQU 15
-TAM_REGISTRO    EQU 68
+TAM_REGISTRO    EQU 70  ; Actualizado: +2 bytes para almacenamiento separado
 TAM_NOMBRE      EQU 21
 TAM_APELLIDO1   EQU 21
 TAM_APELLIDO2   EQU 21
 OFFSET_NOTA     EQU TAM_NOMBRE + TAM_APELLIDO1 + TAM_APELLIDO2 ; 63
+
+; Definir estructura para almacenamiento de notas separadas
+NOTA_INT_SIZE   EQU 2   ; DW para parte entera (0-100)
+NOTA_FRAC_SIZE  EQU 4   ; DD para parte decimal (0-99999)
 
 ; --- Datos de prueba (5 estudiantes) ---
 NumEstudiantesRegistrados DB 5
@@ -32,7 +36,8 @@ EstudiantesData:
     DB 15 DUP(0)
     DB 'Lopez$'
     DB 15 DUP(0)
-    DD 8512345
+    DW 85           ; Parte entera
+    DD 12345        ; Parte decimal
     DB 0 ; Padding
 
     ; Estudiante 2: Nota 69.99999 (Reprobado)
@@ -42,7 +47,8 @@ EstudiantesData:
     DB 15 DUP(0)
     DB 'Ruiz$'
     DB 16 DUP(0)
-    DD 6999999
+    DW 69           ; Parte entera
+    DD 99999        ; Parte decimal
     DB 0 ; Padding
 
     ; Estudiante 3: Nota 95.00000 (Maxima)
@@ -52,7 +58,8 @@ EstudiantesData:
     DB 13 DUP(0)
     DB 'Diaz$'
     DB 16 DUP(0)
-    DD 9500000
+    DW 95           ; Parte entera
+    DD 0            ; Parte decimal
     DB 0 ; Padding
 
     ; Estudiante 4: Nota 50.50000 (Minima)
@@ -62,7 +69,8 @@ EstudiantesData:
     DB 12 DUP(0)
     DB 'Soto$'
     DB 16 DUP(0)
-    DD 5050000
+    DW 50           ; Parte entera
+    DD 50000        ; Parte decimal
     DB 0 ; Padding
 
     ; Estudiante 5: Nota 70.00000 (Aprobado)
@@ -72,13 +80,17 @@ EstudiantesData:
     DB 11 DUP(0)
     DB 'Vega$'
     DB 16 DUP(0)
-    DD 7000000
+    DW 70           ; Parte entera
+    DD 0            ; Parte decimal
     DB 0 ; Padding
 
 ; --- Variables para almacenar resultados ---
-notaMaxima      DD 0
-notaMinima      DD 0
-promedioGeneral DD 0
+notaMaxima      DW 0    ; Parte entera
+notaMaxima_frac DD 0    ; Parte decimal
+notaMinima      DW 0    ; Parte entera  
+notaMinima_frac DD 0    ; Parte decimal
+promedioGeneral DW 0    ; Parte entera
+promedio_frac   DD 0    ; Parte decimal
 aprobados       DW 0
 reprobados      DW 0
 
@@ -90,10 +102,9 @@ msgReprobados   DB 13, 10, 'Reprobados: $'
 newLine         DB 13, 10, '$'
 
 ; --- Constantes ---
-NOTA_APROBACION DD 7000000
-DIVISOR_FLOAT   DW 10000
-; Para la parte fraccional, usaremos 10000 y manejaremos el ultimo digito.
-; Emu8086 tiene limitaciones con divisiones de 32 bits.
+NOTA_APROBACION     DW 70       ; Parte entera de nota de aprobación
+NOTA_APROBACION_FRAC DD 0       ; Parte decimal de nota de aprobación
+DIVISOR_FLOAT       DW 10000
 
 
 ; ============================================================
@@ -118,7 +129,7 @@ start:
 
 ; ------------------------------------------------------------
 ; Stats_CalcularMaxMin: Calcula la nota maxima y minima.
-; Resultados en: notaMaxima (DD), notaMinima (DD)
+; Resultados en: notaMaxima/notaMaxima_frac, notaMinima/notaMinima_frac
 ; ------------------------------------------------------------
 Stats_CalcularMaxMin PROC
     push ax
@@ -136,12 +147,16 @@ Stats_CalcularMaxMin PROC
     add si, OFFSET_NOTA                ; Apuntar a la primera nota
 
     ; Inicializar max y min con la primera nota
-    mov ax, [si]
-    mov dx, [si+2]
+    mov ax, [si]                       ; Parte entera
     mov [notaMaxima], ax
-    mov [notaMaxima+2], dx
     mov [notaMinima], ax
-    mov [notaMinima+2], dx
+    
+    mov ax, [si+2]                     ; Parte decimal (low word)
+    mov dx, [si+4]                     ; Parte decimal (high word)
+    mov [notaMaxima_frac], ax
+    mov [notaMaxima_frac+2], dx
+    mov [notaMinima_frac], ax
+    mov [notaMinima_frac+2], dx
 
     dec cx ; Ya procesamos el primero, ahora N-1 restantes
     jz MaxMin_End
@@ -149,35 +164,60 @@ Stats_CalcularMaxMin PROC
 MaxMin_Loop:
     add si, TAM_REGISTRO ; Siguiente estudiante
 
-    ; Comparar con notaMaxima (DX:AX = nota actual)
-    mov ax, [si]
-    mov dx, [si+2]
-    
-    ; if (DX:AX > notaMaxima)
-    cmp dx, [notaMaxima+2]
+    ; Comparar con notaMaxima
+    mov ax, [si]                       ; Parte entera actual
+    cmp ax, [notaMaxima]
     ja MaxMin_SetMax
     jb MaxMin_CheckMin
-    cmp ax, [notaMaxima]
+    
+    ; Si partes enteras son iguales, comparar partes decimales
+    mov bx, [si+2]                     ; Parte decimal actual (low word)
+    mov dx, [si+4]                     ; Parte decimal actual (high word)
+    
+    cmp dx, [notaMaxima_frac+2]        ; Comparar high words
+    ja MaxMin_SetMax
+    jb MaxMin_CheckMin
+    cmp bx, [notaMaxima_frac]          ; Comparar low words
     ja MaxMin_SetMax
 
 MaxMin_CheckMin:
-    ; Comparar con notaMinima (DX:AX = nota actual)
-    ; if (DX:AX < notaMinima)
-    cmp dx, [notaMinima+2]
+    ; Comparar con notaMinima
+    mov ax, [si]                       ; Parte entera actual
+    cmp ax, [notaMinima]
     jb MaxMin_SetMin
     ja MaxMin_Next
-    cmp ax, [notaMinima]
+    
+    ; Si partes enteras son iguales, comparar partes decimales
+    mov bx, [si+2]                     ; Parte decimal actual (low word)
+    mov dx, [si+4]                     ; Parte decimal actual (high word)
+    
+    cmp dx, [notaMinima_frac+2]        ; Comparar high words
+    jb MaxMin_SetMin
+    ja MaxMin_Next
+    cmp bx, [notaMinima_frac]          ; Comparar low words
     jb MaxMin_SetMin
     jmp MaxMin_Next
 
 MaxMin_SetMax:
+    ; Actualizar máximo (partes entera y decimal)
+    mov ax, [si]                       ; Parte entera
     mov [notaMaxima], ax
-    mov [notaMaxima+2], dx
+    
+    mov ax, [si+2]                     ; Parte decimal (low word)
+    mov dx, [si+4]                     ; Parte decimal (high word)
+    mov [notaMaxima_frac], ax
+    mov [notaMaxima_frac+2], dx
     jmp MaxMin_CheckMin
 
 MaxMin_SetMin:
+    ; Actualizar mínimo (partes entera y decimal)
+    mov ax, [si]                       ; Parte entera
     mov [notaMinima], ax
-    mov [notaMinima+2], dx
+    
+    mov ax, [si+2]                     ; Parte decimal (low word)
+    mov dx, [si+4]                     ; Parte decimal (high word)
+    mov [notaMinima_frac], ax
+    mov [notaMinima_frac+2], dx
 
 MaxMin_Next:
     loop MaxMin_Loop
@@ -193,7 +233,7 @@ Stats_CalcularMaxMin ENDP
 
 ; ------------------------------------------------------------
 ; Stats_CalcularPromedio: Calcula el promedio general.
-; Resultado en: promedioGeneral (DD)
+; Resultado en: promedioGeneral/promedio_frac
 ; ------------------------------------------------------------
 Stats_CalcularPromedio PROC
     push ax
@@ -201,6 +241,7 @@ Stats_CalcularPromedio PROC
     push cx
     push dx
     push si
+    push di
 
     mov cl, [NumEstudiantesRegistrados]
     xor ch, ch
@@ -210,35 +251,41 @@ Stats_CalcularPromedio PROC
     ; Guardar numero de estudiantes para la division
     mov bx, cx
 
-    ; Sumador de 32 bits: DX:AX acumulador
-    xor ax, ax
-    xor dx, dx
+    ; Acumuladores separados para parte entera y decimal
+    xor ax, ax      ; Suma parte entera
+    xor dx, dx      ; Suma parte decimal (32 bits en DI:DX)
+    xor di, di
     
     mov si, OFFSET EstudiantesData
     add si, OFFSET_NOTA
 
 Promedio_Loop:
-    ; Sumar nota actual a DX:AX
+    ; Sumar parte entera
     add ax, [si]
-    adc dx, [si+2]
+    
+    ; Sumar parte decimal (32 bits)
+    add dx, [si+2]      ; Low word
+    adc di, [si+4]      ; High word
     
     add si, TAM_REGISTRO
     loop Promedio_Loop
 
-    ; Guardar suma total en promedioGeneral temporalmente
+    ; Dividir suma de partes enteras por número de estudiantes
+    xor dx, dx          ; Limpiar DX para división 16-bit
+    div bx              ; AX = parte entera del promedio
     mov [promedioGeneral], ax
-    mov [promedioGeneral+2], dx
-
-    ; Cargar la suma (dividendo) en DX:AX y dividir por BX (número estudiantes)
-    mov ax, [promedioGeneral]
-    mov dx, [promedioGeneral+2]
-    call Div32By16    ; Regresa cociente en DX:AX
-
-    ; Guardar promedio (resultado de división) en la variable
-    mov [promedioGeneral], ax
-    mov [promedioGeneral+2], dx
+    
+    ; Para la parte decimal, necesitamos dividir DI:DX por BX
+    ; Primero movemos DI:DX a DX:AX para usar nuestra rutina de división
+    mov ax, dx
+    mov dx, di
+    call Div32By16      ; Divide DX:AX por BX, resultado en DX:AX
+    
+    mov [promedio_frac], ax
+    mov [promedio_frac+2], dx
 
 Promedio_End:
+    pop di
     pop si
     pop dx
     pop cx
@@ -326,14 +373,21 @@ Stats_ContarAprobadosReprobados PROC
     add si, OFFSET_NOTA
 
 Contar_Loop:
-    mov ax, [si]
-    mov dx, [si+2]
-
-    ; if (DX:AX >= NOTA_APROBACION)
-    cmp dx, [NOTA_APROBACION+2]
-    jb Contar_Reprobado
-    ja Contar_Aprobado
+    ; Comparar parte entera primero
+    mov ax, [si]                       ; Parte entera actual
     cmp ax, [NOTA_APROBACION]
+    ja Contar_Aprobado                 ; Si parte entera > 70, aprobado
+    jb Contar_Reprobado                ; Si parte entera < 70, reprobado
+    
+    ; Si partes enteras son iguales (70), comparar partes decimales
+    mov bx, [si+2]                     ; Parte decimal actual (low word)
+    mov dx, [si+4]                     ; Parte decimal actual (high word)
+    
+    ; Comparar con parte decimal de nota de aprobación (que es 0)
+    cmp dx, [NOTA_APROBACION_FRAC+2]   ; Comparar high words
+    ja Contar_Aprobado
+    jb Contar_Reprobado
+    cmp bx, [NOTA_APROBACION_FRAC]     ; Comparar low words
     jb Contar_Reprobado
 
 Contar_Aprobado:
@@ -355,5 +409,47 @@ Contar_End:
     pop ax
     ret
 Stats_ContarAprobadosReprobados ENDP
+
+; ------------------------------------------------------------
+; NormalizeGrade: Normaliza una nota si la parte decimal >= 100000
+; Entrada: SI apunta a la nota (parte entera primero, luego decimal)
+; ------------------------------------------------------------
+NormalizeGrade PROC
+    push ax
+    push dx
+    push bx
+    
+    ; Cargar parte decimal completa (32 bits)
+    mov ax, [si+2]      ; Low word de parte decimal
+    mov dx, [si+4]      ; High word de parte decimal
+    
+    ; Comparar con 100000 usando comparación de 32 bits
+    ; 100000 = 0x186A0
+    cmp dx, 1           ; Comparar high word con 1
+    ja Normalize_Adjust ; Si high word > 1, definitivamente >= 100000
+    jb Normalize_Done   ; Si high word < 1, definitivamente < 100000
+    
+    ; Si high word = 1, comparar low word con 0x86A0 (34464)
+    cmp ax, 34464       ; 0x86A0 = 34464
+    jb Normalize_Done   ; Si < 34464, entonces < 100000
+    
+Normalize_Adjust:
+    ; Ajustar: incrementar parte entera, restar 100000 de parte decimal
+    inc WORD PTR [si]   ; Incrementar parte entera
+    
+    ; Restar 100000 (0x186A0) de DX:AX
+    sub ax, 34464       ; Restar low part de 100000
+    sbb dx, 1           ; Restar high part de 100000 con borrow
+    
+    ; Guardar resultado
+    mov [si+2], ax      ; Guardar low word ajustado
+    mov [si+4], dx      ; Guardar high word ajustado
+    
+Normalize_Done:
+    pop bx
+    pop dx
+    pop ax
+    ret
+NormalizeGrade ENDP
 
 END start
