@@ -99,7 +99,9 @@ msgMaxima       DB 13, 10, 'Nota Maxima: $'
 msgMinima       DB 13, 10, 'Nota Minima: $'
 msgPromedio     DB 13, 10, 'Promedio: $'
 msgAprobados    DB 13, 10, 'Aprobados: $'
+msgPorcAprobados DB ' (', '%)', '$'
 msgReprobados   DB 13, 10, 'Reprobados: $'
+msgPorcReprobados DB ' (', '%)', '$'
 newLine         DB 13, 10, '$'
 
 ; --- Variables temporales ---
@@ -632,22 +634,58 @@ ImprimirResultados PROC
     ; No necesitamos dx ya que los valores son < 99999
     call ImprimirDecimal
     
-    ; Imprimir aprobados
+    ; Imprimir aprobados y su porcentaje
     mov dx, OFFSET msgAprobados
     mov ah, 09h
     int 21h
     
     mov ax, [aprobados]
     call ImprimirNumero
+
+    ; Calcular porcentaje aprobados
+    mov al, [NumEstudiantesRegistrados]
+    xor ah, ah          ; AX = total estudiantes
+    cmp ax, 0          ; Evitar división por cero
+    je SinPorcentajes
     
-    ; Imprimir reprobados
+    mov bx, ax         ; BX = total estudiantes
+    mov ax, [aprobados]
+    mov cx, 100        ; Multiplicar por 100 para porcentaje
+    mul cx             ; DX:AX = aprobados * 100
+    div bx             ; AX = (aprobados * 100) / total
+
+    push ax            ; Guardar resultado
+    mov dx, OFFSET msgPorcAprobados
+    mov ah, 09h
+    int 21h
+    pop ax
+    call ImprimirNumero
+    
+    ; Imprimir reprobados y su porcentaje
     mov dx, OFFSET msgReprobados
     mov ah, 09h
     int 21h
     
     mov ax, [reprobados]
     call ImprimirNumero
+
+    ; Calcular porcentaje reprobados
+    mov al, [NumEstudiantesRegistrados]
+    xor ah, ah
+    mov bx, ax
+    mov ax, [reprobados]
+    mov cx, 100
+    mul cx
+    div bx
     
+    push ax
+    mov dx, OFFSET msgPorcReprobados
+    mov ah, 09h
+    int 21h
+    pop ax
+    call ImprimirNumero
+
+SinPorcentajes:    
     mov dx, OFFSET newLine
     mov ah, 09h
     int 21h
