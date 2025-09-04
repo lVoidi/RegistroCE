@@ -206,14 +206,9 @@ DIVISOR_FLOAT       DW 10000    ; Divisor para cálculos decimales (10^4)
 msgIngIndice   db 13,10,'Ingrese el indice del estudiante (1-15) y presione Enter: $'
 msgFueraRango  db 13,10,'[ERROR] Indice fuera de rango.',13,10,'$'
 msgResultado   db 13,10,'Estudiante: $'
-msgNota        db 13,10,'Nota: $'
-newline        db 13,10,'$'
+msgNotaI       db 13,10,'Nota: $'
 estudiantes    db 0
 msgListaVacia db 13,10,'Lista vacia$',13,10,'$'
-
-; ============================================================
-;   DATOS DE LA OPCCION4: ORDENAR CALIFICACIONES
-; ============================================================
 
 ; ============================================================
 ;   CODIGO PRINCIPAL (MAIN)
@@ -277,7 +272,7 @@ Opt4:
     mov ah, 09h
     int 21h
     ; Ordenamiento descendente
-    mov dx, OFFSET msgDescendente ; Mensaje para orden descendente
+    mov dx, OFFSET msgDescending ; Mensaje para orden descendente
     mov ah, 09h
     int 21h
     mov al, 1           ; 1 = descendente
@@ -494,7 +489,7 @@ AfterName:
     inc bx             ; saltar '$'
 
     ; Mostrar mensaje nota
-    mov dx, OFFSET msgNota
+    mov dx, OFFSET msgNotaI
     mov ah, 09h
     int 21h
 
@@ -823,31 +818,7 @@ DisplayDone:
     ret
 Mostrar_Todos_Estudiantes ENDP
 
-; Helper procedure to display a '$' terminated string
-DisplayString PROC NEAR
-    push ax
-    push dx
-    
-DisplayChar:
-    mov al, [si]
-    cmp al, '$'             ; Check for terminator
-    je DisplayStringDone
-    cmp al, ' '             ; Skip trailing spaces
-    je CheckNext
-    
-    mov dl, al
-    mov ah, 02h
-    int 21h
-    
-CheckNext:
-    inc si
-    jmp DisplayChar
-    
-DisplayStringDone:
-    pop dx
-    pop ax
-    ret
-DisplayString ENDP
+; Helper procedure to display a '$' terminated string;
 
 
 ; ============================================================
