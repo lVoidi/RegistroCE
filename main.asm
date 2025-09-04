@@ -598,11 +598,12 @@ FieldDone:
     ret
 ParseFieldToStruct ENDP
 
-; Parse grade (integer.decimal format)
+; Parse grade (integer decimal format)
 ParseGrade PROC NEAR
     push bx
     push cx
     push dx
+    push di
     
     ; Skip to grade part
 GradeSkip:
@@ -645,6 +646,7 @@ ParseInteger:
     
 ParseDecimal:
     inc si                       ; Skip decimal point
+    xor dx, dx                   ; Reset digit counter
     
 ParseDecimalLoop:
     mov al, [si]
@@ -661,10 +663,15 @@ ParseDecimalLoop:
     
     ; cx = cx * 10 + al
     mov ah, 0
-    xchg ax, cx
+    push dx                      ; Save digit counter
+    push ax                      ; Save digit
+    mov ax, cx
     mov dx, 10
-    mul dx
-    add cx, ax
+    mul dx                       ; DX:AX = cx * 10
+    mov cx, ax
+    pop ax                       ; Restore digit
+    add cx, ax                   ; Add digit
+    pop dx                       ; Restore digit counter
     inc dx                       ; Count decimal digits
     inc si
     cmp dx, 5                    ; Max 5 decimal digits
@@ -680,12 +687,14 @@ GradeEnd:
     cmp dx, 5                    ; If already 5 digits, done
     je StoreDecimal
     
-    ; Scale to 5 digits
-ScaleLoop:
+    ; Scale to 5 digits by multiplying by 10^(5-digits)
     mov bx, 10
-    mul bx
-    dec dx
-    jnz ScaleLoop
+ScaleLoop:
+    cmp dx, 5
+    jae StoreDecimal
+    mul bx                       ; AX = AX * 10
+    inc dx
+    jmp ScaleLoop
     
 StoreDecimal:
     mov [di], ax
@@ -698,6 +707,7 @@ GradeError:
     mov al, 0                    ; Failure
 
 GradeDone:
+    pop di
     pop dx
     pop cx
     pop bx
