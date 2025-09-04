@@ -521,6 +521,16 @@ AfterApellidoM:
     mov ax, [bx]       ; Cargar parte entera (2 bytes)
     call PrintNumber   ; Convertir y mostrar número
 
+    ; --- Mostrar punto decimal ---
+    mov dx, OFFSET dot
+    mov ah, 09h
+    int 21h
+
+    ; --- Mostrar nota (parte decimal, DD) ---
+    add bx, 2          ; Saltar parte entera
+    mov ax, [bx]       ; Cargar los 2 bytes bajos de la parte decimal
+    call ImprimirDecimal ; Convertir y mostrar parte decimal
+
     jmp Fin
 
 FueraRango:
