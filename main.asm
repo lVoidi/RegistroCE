@@ -209,6 +209,8 @@ msgResultado   db 13,10,'Estudiante: $'
 msgNotaI       db 13,10,'Nota: $'
 estudiantes    db 0
 msgListaVacia db 13,10,'Lista vacia$',13,10,'$'
+space         db ' $'
+dot           db '. $'
 
 ; ============================================================
 ;   CODIGO PRINCIPAL (MAIN)
@@ -416,65 +418,44 @@ Buscar_Estudiante PROC NEAR
     push dx
     push si
 
-    ; --- Verificar si lista vacia ---
-    mov bx, OFFSET estudiantes
+    ; --- Verificar si lista vacía ---
+    mov bx, OFFSET EstudiantesData
     mov al, [bx]
-    cmp al, 0          ; si esta vacia
+    cmp al, 0          ; Si está vacía
     je ListaVacia
-    cmp al, '$'        ; o si tiene solo terminador
+    cmp al, '$'        ; O si tiene solo terminador
     je ListaVacia
 
-    ; --- Pedir Indice ---
+    ; --- Pedir índice ---
     mov dx, OFFSET msgIngIndice
     mov ah, 09h
     int 21h
 
-    ; (ADD) Enter para validar
+    ; Leer índice (asumiendo que ReadWithEnter devuelve un dígito en AL)
     call ReadWithEnter
-    sub al, '0'
-    mov bl, al         ; guardar indice ingresado
+    sub al, '0'        ; Convertir de ASCII a valor numérico
+    mov bl, al         ; Guardar índice ingresado
 
+    ; Validar rango (1 a 5, ya que hay 5 estudiantes)
     cmp bl, 1
     jb FueraRango
-    cmp bl, 15
+    cmp bl, 5          ; Máximo 5 estudiantes
     ja FueraRango
 
-    dec bl             ; indice base 0
-    mov si, bx         ; contador de desplazamiento
-    mov bx, OFFSET estudiantes
+    ; Calcular desplazamiento al registro del estudiante
+    dec bl             ; Índice base 0
+    mov ax, 70         ; Tamaño de cada registro (70 bytes)
+    mul bl             ; AX = índice * 70
+    mov si, ax         ; Guardar desplazamiento en SI
+    mov bx, OFFSET EstudiantesData
+    add bx, si         ; BX apunta al inicio del registro del estudiante
 
-NextStudent:
-    cmp si, 0
-    je FoundStudent
-SkipLoop:
-    mov al, [bx]
-    cmp al, '$'
-    je EndOfRecord
-    inc bx
-    jmp SkipLoop
-
-EndOfRecord:
-    inc bx             ; saltar '$' (terminador de nombre)
-    ; aqui podriaa venir la nota como texto hasta otro '$'
-    ; saltamos la nota tambien
-SkipNota:
-    mov al, [bx]
-    cmp al, '$'
-    je SkipNotaDone
-    inc bx
-    jmp SkipNota
-SkipNotaDone:
-    inc bx
-    dec si
-    jmp NextStudent
-
-FoundStudent:
-    ; Mostrar mensaje resultado
+    ; --- Mostrar mensaje de resultado ---
     mov dx, OFFSET msgResultado
     mov ah, 09h
     int 21h
 
-    ; Mostrar nombre y apellidos hasta '$'
+    ; --- Mostrar nombre (21 bytes, hasta '$') ---
 ShowName:
     mov al, [bx]
     cmp al, '$'
@@ -486,23 +467,61 @@ ShowName:
     jmp ShowName
 
 AfterName:
-    inc bx             ; saltar '$'
-
-    ; Mostrar mensaje nota
-    mov dx, OFFSET msgNotaI
+    mov dx, OFFSET space ; Espacio entre nombre y apellido
     mov ah, 09h
     int 21h
+    mov bx, OFFSET EstudiantesData
+    add bx, si         ; Restaurar BX al inicio del registro
+    add bx, 21         ; Saltar al inicio del apellido paterno
 
-    ; Mostrar nota hasta '$'
-ShowNota:
+    ; --- Mostrar apellido paterno (21 bytes, hasta '$') ---
+ShowApellidoP:
     mov al, [bx]
     cmp al, '$'
-    je Fin
+    je AfterApellidoP
     mov dl, al
     mov ah, 02h
     int 21h
     inc bx
-    jmp ShowNota
+    jmp ShowApellidoP
+
+AfterApellidoP:
+    mov dx, OFFSET space
+    mov ah, 09h
+    int 21h
+    mov bx, OFFSET EstudiantesData
+    add bx, si         ; Restaurar BX al inicio del registro
+    add bx, 42         ; Saltar al inicio del apellido materno
+
+    ; --- Mostrar apellido materno (21 bytes, hasta '$') ---
+ShowApellidoM:
+    mov al, [bx]
+    cmp al, '$'
+    je AfterApellidoM
+    mov dl, al
+    mov ah, 02h
+    int 21h
+    inc bx
+    jmp ShowApellidoM
+
+AfterApellidoM:
+    mov dx, OFFSET newline
+    mov ah, 09h
+    int 21h
+    mov bx, OFFSET EstudiantesData
+    add bx, si         ; Restaurar BX al inicio del registro
+    add bx, 63         ; Saltar al inicio de la nota (parte entera)
+
+    ; --- Mostrar mensaje de nota ---
+    mov dx, OFFSET msgNotaI
+    mov ah, 09h
+    int 21h
+
+    ; --- Mostrar nota (parte entera, DW) ---
+    mov ax, [bx]       ; Cargar parte entera (2 bytes)
+    call PrintNumber   ; Convertir y mostrar número
+
+    jmp Fin
 
 FueraRango:
     mov dx, OFFSET msgFueraRango
@@ -528,6 +547,47 @@ Fin:
     pop ax
     ret
 Buscar_Estudiante ENDP
+
+; --- Función auxiliar para imprimir un número entero (AX) ---
+PrintNumber PROC NEAR
+    push ax
+    push bx
+    push cx
+    push dx
+
+    mov cx, 0          ; Contador de dígitos
+    mov bx, 10         ; Base 10
+
+    ; Manejar caso especial: AX = 0
+    cmp ax, 0
+    jne DivideLoop
+    mov dl, '0'        ; Si AX es 0, imprimir '0'
+    mov ah, 02h
+    int 21h
+    jmp EndPrintNumber
+
+DivideLoop:
+    xor dx, dx         ; Limpiar DX para división
+    div bx             ; AX = AX / 10, DX = resto
+    add dl, '0'        ; Convertir resto a ASCII
+    push dx            ; Guardar dígito
+    inc cx             ; Incrementar contador
+    cmp ax, 0          ; ¿Quedan más dígitos?
+    jne DivideLoop
+
+PrintLoop:
+    pop dx             ; Recuperar dígito
+    mov ah, 02h
+    int 21h
+    loop PrintLoop
+
+EndPrintNumber:
+    pop dx
+    pop cx
+    pop bx
+    pop ax
+    ret
+PrintNumber ENDP
 
 ; ============================================================
 ;   MODULO: INGRESAR CALIFICACIONES
