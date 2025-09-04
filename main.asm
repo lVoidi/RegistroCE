@@ -70,63 +70,63 @@ NOTA_INT_SIZE   EQU 2   ; DW para parte entera (0-100)
 NOTA_FRAC_SIZE  EQU 4   ; DD para parte decimal (0-99999)
 
 ; --- Datos de prueba (5 estudiantes) ---
-NumEstudiantesRegistrados DB 5
+NumEstudiantesRegistrados DB 0 ;Si se usan los precargados, usar 5
 
-EstudiantesData:
+    EstudiantesData:DB MAX_ESTUDIANTES * TAM_REGISTRO DUP(0)
     ; Estudiante 1: Nota 85.12345
-    DB 'Juan$'             ; 5 bytes
-    DB 16 DUP(0)           ; 16 bytes -> Total: 21 bytes
-    DB 'Perez$'            ; 6 bytes  
-    DB 15 DUP(0)           ; 15 bytes -> Total: 21 bytes
-    DB 'Lopez$'            ; 6 bytes
-    DB 15 DUP(0)           ; 15 bytes -> Total: 21 bytes
-    DW 85                  ; 2 bytes - Parte entera
-    DD 12345               ; 4 bytes - Parte decimal
-    DB 0                   ; 1 byte - Padding -> Total registro: 70 bytes
+    ;DB 'Juan$'             ; 5 bytes
+    ;DB 16 DUP(0)           ; 16 bytes -> Total: 21 bytes
+    ;DB 'Perez$'            ; 6 bytes  
+    ;DB 15 DUP(0)           ; 15 bytes -> Total: 21 bytes
+    ;DB 'Lopez$'            ; 6 bytes
+    ;DB 15 DUP(0)           ; 15 bytes -> Total: 21 bytes
+    ;DW 85                  ; 2 bytes - Parte entera
+    ;DD 12345               ; 4 bytes - Parte decimal
+    ;DB 0                   ; 1 byte - Padding -> Total registro: 70 bytes
 
     ; Estudiante 2: Nota 69.99999 (Reprobado)
-    DB 'Maria$'            ; 6 bytes
-    DB 15 DUP(0)           ; 15 bytes -> Total: 21 bytes
-    DB 'Gomez$'            ; 6 bytes
-    DB 15 DUP(0)           ; 15 bytes -> Total: 21 bytes
-    DB 'Ruiz$'             ; 5 bytes
-    DB 16 DUP(0)           ; 16 bytes -> Total: 21 bytes
-    DW 69                  ; 2 bytes - Parte entera
-    DD 99999               ; 4 bytes - Parte decimal
-    DB 0                   ; 1 byte - Padding -> Total registro: 70 bytes
+    ;DB 'Maria$'            ; 6 bytes
+    ;DB 15 DUP(0)           ; 15 bytes -> Total: 21 bytes
+    ;DB 'Gomez$'            ; 6 bytes
+    ;DB 15 DUP(0)           ; 15 bytes -> Total: 21 bytes
+    ;DB 'Ruiz$'             ; 5 bytes
+    ;DB 16 DUP(0)           ; 16 bytes -> Total: 21 bytes
+    ;DW 69                  ; 2 bytes - Parte entera
+    ;DD 99999               ; 4 bytes - Parte decimal
+    ;DB 0                   ; 1 byte - Padding -> Total registro: 70 bytes
 
     ; Estudiante 3: Nota 95.00000 (Maxima)
-    DB 'Carlos$'           ; 7 bytes
-    DB 14 DUP(0)           ; 14 bytes -> Total: 21 bytes
-    DB 'Sanchez$'          ; 8 bytes
-    DB 13 DUP(0)           ; 13 bytes -> Total: 21 bytes
-    DB 'Diaz$'             ; 5 bytes
-    DB 16 DUP(0)           ; 16 bytes -> Total: 21 bytes
-    DW 95                  ; 2 bytes - Parte entera
-    DD 0                   ; 4 bytes - Parte decimal
-    DB 0                   ; 1 byte - Padding -> Total registro: 70 bytes
+    ;DB 'Carlos$'           ; 7 bytes
+    ;DB 14 DUP(0)           ; 14 bytes -> Total: 21 bytes
+    ;DB 'Sanchez$'          ; 8 bytes
+    ;DB 13 DUP(0)           ; 13 bytes -> Total: 21 bytes
+    ;DB 'Diaz$'             ; 5 bytes
+    ;DB 16 DUP(0)           ; 16 bytes -> Total: 21 bytes
+    ;DW 95                  ; 2 bytes - Parte entera
+    ;DD 0                   ; 4 bytes - Parte decimal
+    ;DB 0                   ; 1 byte - Padding -> Total registro: 70 bytes
 
     ; Estudiante 4: Nota 50.50000 (Minima)
-    DB 'Ana$'              ; 4 bytes
-    DB 17 DUP(0)           ; 17 bytes -> Total: 21 bytes
-    DB 'Martinez$'         ; 9 bytes
-    DB 12 DUP(0)           ; 12 bytes -> Total: 21 bytes
-    DB 'Soto$'             ; 5 bytes
-    DB 16 DUP(0)           ; 16 bytes -> Total: 21 bytes
-    DW 50                  ; 2 bytes - Parte entera
-    DD 50000               ; 4 bytes - Parte decimal
-    DB 0                   ; 1 byte - Padding -> Total registro: 70 bytes
+    ;DB 'Ana$'              ; 4 bytes
+    ;DB 17 DUP(0)           ; 17 bytes -> Total: 21 bytes
+    ;DB 'Martinez$'         ; 9 bytes
+    ;DB 12 DUP(0)           ; 12 bytes -> Total: 21 bytes
+    ;DB 'Soto$'             ; 5 bytes
+    ;DB 16 DUP(0)           ; 16 bytes -> Total: 21 bytes
+    ;DW 50                  ; 2 bytes - Parte entera
+    ;DD 50000               ; 4 bytes - Parte decimal
+    ;DB 0                   ; 1 byte - Padding -> Total registro: 70 bytes
 
     ; Estudiante 5: Nota 70.00000 (Aprobado)
-    DB 'Luis$'             ; 5 bytes
-    DB 16 DUP(0)           ; 16 bytes -> Total: 21 bytes
-    DB 'Hernandez$'        ; 10 bytes
-    DB 11 DUP(0)           ; 11 bytes -> Total: 21 bytes
-    DB 'Vega$'             ; 5 bytes
-    DB 16 DUP(0)           ; 16 bytes -> Total: 21 bytes
-    DW 70                  ; 2 bytes - Parte entera
-    DD 0                   ; 4 bytes - Parte decimal
-    DB 0                   ; 1 byte - Padding -> Total registro: 70 bytes
+    ;DB 'Luis$'             ; 5 bytes
+    ;DB 16 DUP(0)           ; 16 bytes -> Total: 21 bytes
+    ;DB 'Hernandez$'        ; 10 bytes
+    ;DB 11 DUP(0)           ; 11 bytes -> Total: 21 bytes
+    ;DB 'Vega$'             ; 5 bytes
+    ;DB 16 DUP(0)           ; 16 bytes -> Total: 21 bytes
+    ;DW 70                  ; 2 bytes - Parte entera
+    ;DD 0                   ; 4 bytes - Parte decimal
+    ;DB 0                   ; 1 byte - Padding -> Total registro: 70 bytes
 
 ; --- VARIABLES PARA ALMACENAR RESULTADOS ESTADISTICOS ---
 ; Estructura de almacenamiento para notas:
@@ -587,25 +587,25 @@ EndField:
     cmp cx, 0                    ; Check if we got any characters
     je FieldError
     
-    mov al, 1                    ; Success
+    mov al, 1                    ; Exito
     jmp FieldDone
 
 FieldError:
-    mov al, 0                    ; Failure
+    mov al, 0                    ; Caso de Error
 
 FieldDone:
     pop cx
     ret
 ParseFieldToStruct ENDP
 
-; Parse grade (integer decimal format)
+; Parse grade (interpretacion de la parte decimal como entero) - FIX
 ParseGrade PROC NEAR
     push bx
     push cx
     push dx
     push di
     
-    ; Skip to grade part
+    ; Saltar a la parte de calificacion
 GradeSkip:
     mov al, [si]
     cmp al, 0
@@ -617,9 +617,9 @@ GradeSkip:
     
 GradeStart:
     ; Parse integer part
-    xor bx, bx                   ; Integer accumulator
-    xor cx, cx                   ; Decimal accumulator
-    xor dx, dx                   ; Decimal digit counter
+    xor bx, bx                   ; Acumulador de enteros
+    xor cx, cx                   ; Acumulador de decimales
+    xor dx, dx                   ; Contador de digitos decimales
     
 ParseInteger:
     mov al, [si]
@@ -630,7 +630,7 @@ ParseInteger:
     cmp al, ' '
     je GradeEnd
     
-    ; Convert digit and add to integer
+    ; Convertir digitos y sumarlos a numeros enteros
     sub al, '0'
     jb GradeError
     cmp al, 9
@@ -645,8 +645,8 @@ ParseInteger:
     jmp ParseInteger
     
 ParseDecimal:
-    inc si                       ; Skip decimal point
-    xor dx, dx                   ; Reset digit counter
+    inc si                       ; Saltar el punto "." decimal
+    xor dx, dx                   ; Reinicio del contador de digitos
     
 ParseDecimalLoop:
     mov al, [si]
@@ -655,56 +655,56 @@ ParseDecimalLoop:
     cmp al, ' '
     je GradeEnd
     
-    ; Convert digit and add to decimal
-    sub al, '0'
-    jb GradeError
+    ; Convertir digito y agregar a decimal
+    sub al, '0'                  ; Convertir ASCII a numero
+    jb GradeError                ;Error, la entrada no es un numero
     cmp al, 9
     ja GradeError
     
     ; cx = cx * 10 + al
     mov ah, 0
-    push dx                      ; Save digit counter
-    push ax                      ; Save digit
-    mov ax, cx
-    mov dx, 10
+    push dx                      ; Guardar contador temporalmente
+    push ax                      ; Guardar digito temporalmente
+    mov ax, cx                   ; Cargar decimal actual
+    mov dx, 10                   ; Multiplicar por 10
     mul dx                       ; DX:AX = cx * 10
-    mov cx, ax
-    pop ax                       ; Restore digit
-    add cx, ax                   ; Add digit
-    pop dx                       ; Restore digit counter
-    inc dx                       ; Count decimal digits
-    inc si
-    cmp dx, 5                    ; Max 5 decimal digits
+    mov cx, ax                   ;Guardar resultado
+    pop ax                       ; Restaurar Digito
+    add cx, ax                   ; Annadir digito
+    pop dx                       ; Contar digito procesado
+    inc dx                       ; Contar digito procesado
+    inc si                       ; Siguiente caracter
+    cmp dx, 5                    ; Maximo 5 digitos decimales
     jb ParseDecimalLoop
     
 GradeEnd:
-    ; Store integer part
+    ; Guardar parte entera (2 bytes)
     mov [di], bx
     add di, 2
     
-    ; Store decimal part (scale to 5 digits)
+    ; Guardar parte decimal (escalar a 5 digitos si es necesario)
     mov ax, cx
-    cmp dx, 5                    ; If already 5 digits, done
+    cmp dx, 5                    
     je StoreDecimal
     
-    ; Scale to 5 digits by multiplying by 10^(5-digits)
+    ; Escalar a 5 digitos multiplicando por 10^(5-digitos)
     mov bx, 10
-ScaleLoop:
-    cmp dx, 5
+ScaleLoop:                       ; Base para multiplicar
+    cmp dx, 5                    ;Validacion: Hay 5 digitos?
     jae StoreDecimal
     mul bx                       ; AX = AX * 10
-    inc dx
+    inc dx                       ; Contar digito agregado
     jmp ScaleLoop
     
 StoreDecimal:
-    mov [di], ax
-    mov word ptr [di+2], 0       ; High word of decimal
+    mov [di], ax                 ; Guardar parte decimal (4 bytes)
+    mov word ptr [di+2], 0       ; ; Parte alta de decimal (max 99999)
     
-    mov al, 1                    ; Success
+    mov al, 1                    ; Exito
     jmp GradeDone
 
 GradeError:
-    mov al, 0                    ; Failure
+    mov al, 0                    ; Error
 
 GradeDone:
     pop di
@@ -780,12 +780,9 @@ Buscar_Estudiante PROC NEAR
     push dx
     push si
 
-    ; --- Verificar si lista vacía ---
-    mov bx, OFFSET EstudiantesData
-    mov al, [bx]
-    cmp al, 0          ; Si está vacía
-    je ListaVacia
-    cmp al, '$'        ; O si tiene solo terminador
+    ; --- Verificar si lista vacia ---
+    mov al, [NumEstudiantesRegistrados]  ; Usar el contador de estudiantes
+    cmp al, 0                            ; Si es 0, est� vac�a
     je ListaVacia
 
     ; --- Pedir índice ---
@@ -798,12 +795,12 @@ Buscar_Estudiante PROC NEAR
     sub al, '0'        ; Convertir de ASCII a valor numérico
     mov bl, al         ; Guardar índice ingresado
 
-    ; Validar rango (1 a 5, ya que hay 5 estudiantes)
+    ; Validar rango (1 a numero real de estudiantes)
     cmp bl, 1
     jb FueraRango
-    mov al, [NumEstudiantesRegistrados]  ; Obtener numero real de estudiantes
+    mov al, [NumEstudiantesRegistrados]  ; Usar contador real
     xor ah, ah
-    cmp bl, al          ; Comparar con el n�mero real
+    cmp bl, al          ; Comparar con el numero real
     ja FueraRango
     
 
