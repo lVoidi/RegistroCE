@@ -725,20 +725,21 @@ InputLoop:
     mov ah, 09h
     int 21h
     
-    ; Leer la linea de entrada
+    ; Leer la línea de entrada
     call ReadInputLine
     
     ; verifica si el usuario quiere volver al menu (con 9)
     mov si, OFFSET inputBuffer
     mov al, [si]
-    je ExitToMenu        ; SALIR DIRECTAMENTE AL MENU
+    cmp al, '9'          ; ?--- CAMBIAR DE '5' A '9'
+    je ExitToMenu        ; ?--- SALIR DIRECTAMENTE AL MENÚ
     
-    ; Analizar y almacenar la entrada en formato EstudiantesData
+    ; Parse and store the input in EstudiantesData format
     call ParseAndStoreStudentData
-    cmp al, 0                    ;
-    je InputLoop                 
+    cmp al, 0                    ; Check if parsing was successful
+    je InputLoop                 ; If failed, try again
     
-    ; Incremento del contador de estudiantes
+    ; Increment student count
     inc [NumEstudiantesRegistrados]
     jmp InputLoop
 
@@ -756,6 +757,7 @@ ExitToMenu:
     pop ax
     ret
 Ingresar_Calificaciones ENDP
+
 
 ; ============================================================
 ;   MODULO: BUSCAR INDICE
