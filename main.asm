@@ -21,10 +21,9 @@ Estadisticas   db '2) Mostrar estadisticas.',13,10,'$'
 Buscar         db '3) Buscar estudiante por indice.',13,10,'$'
 Ordenar        db '4) Ordenar calificaciones.',13,10,'$'
 Salir          db '5) Salir.',13,10,'$'
-MostrarTodos   db '6) Mostrar todos los estudiantes.',13,10,'$'
 msgInvalido    db 13,10,'Opcion invalida. Intente de nuevo.',13,10,'$'
 msgSalida    db 13,10,'Gracias por usar Registro CE. Hasta luego!',13,10,'$'
-msgPrompt      db 'Seleccione una opcion (1-6) y presione Enter: $'           
+msgPrompt      db 'Seleccione una opcion (1-5) y presione Enter: $'           
               
 ; ============================================================
 ;   DATOS DE LA OPCION1: INGRESAR CALIFICACIONES
@@ -38,7 +37,7 @@ NotesTable        db 75 dup(' ')                  ; 15 estudiantes * 5 bytes cad
 
 studentCount      db 0                             ; Contador de estudiantes
 inputBuffer       db 100 dup(0)                   ; (tengo que investigar esta linea)
-msgStudentPrompt  db 13,10,'Por favor ingrese su estudiante o digite 5 para salir al menu principal',13,10,'$'
+msgStudentPrompt  db 13,10,'Por favor ingrese su estudiante o digite 9 para salir al menu principal',13,10,'$'
 msgMaxStudents    db 13,10,'[ERROR] Maximo 15 estudiantes permitidos.',13,10,'$'
 msgInvalidFormat  db 13,10,'[ERROR] Formato invalido. Use: Nombre Apellido1 Apellido2 Nota',13,10,'$'
 msgNoStudents db 13,10,'No hay estudiantes registrados.',13,10,'$'
@@ -47,7 +46,7 @@ msgNoStudents db 13,10,'No hay estudiantes registrados.',13,10,'$'
 ;   DATOS DE LA OPCCION2 Y OPCCION4: PARA LAS ESTADISTICAS Y EL ORDENAMIENTO
 ; ============================================================================
 
-; --- DEFINICIÓN DE LA ESTRUCTURA DE DATOS ---
+; --- DEFINICION DE LA ESTRUCTURA DE DATOS ---
 ; La estructura se alinea con la definida en main.asm y consiste en:
 ; 1. Registro de Estudiante (70 bytes totales):
 ;    - Nombre       (21 bytes): Cadena terminada en $, padding con 0s
@@ -71,65 +70,65 @@ NOTA_INT_SIZE   EQU 2   ; DW para parte entera (0-100)
 NOTA_FRAC_SIZE  EQU 4   ; DD para parte decimal (0-99999)
 
 ; --- Datos de prueba (5 estudiantes) ---
-NumEstudiantesRegistrados DB 5
+NumEstudiantesRegistrados DB 0 ;Si se usan los precargados, usar 5
 
-EstudiantesData:
+    EstudiantesData:DB MAX_ESTUDIANTES * TAM_REGISTRO DUP(0)
     ; Estudiante 1: Nota 85.12345
-    DB 'Juan$'             ; 5 bytes
-    DB 16 DUP(0)           ; 16 bytes -> Total: 21 bytes
-    DB 'Perez$'            ; 6 bytes  
-    DB 15 DUP(0)           ; 15 bytes -> Total: 21 bytes
-    DB 'Lopez$'            ; 6 bytes
-    DB 15 DUP(0)           ; 15 bytes -> Total: 21 bytes
-    DW 85                  ; 2 bytes - Parte entera
-    DD 12345               ; 4 bytes - Parte decimal
-    DB 0                   ; 1 byte - Padding -> Total registro: 70 bytes
+    ;DB 'Juan$'             ; 5 bytes
+    ;DB 16 DUP(0)           ; 16 bytes -> Total: 21 bytes
+    ;DB 'Perez$'            ; 6 bytes  
+    ;DB 15 DUP(0)           ; 15 bytes -> Total: 21 bytes
+    ;DB 'Lopez$'            ; 6 bytes
+    ;DB 15 DUP(0)           ; 15 bytes -> Total: 21 bytes
+    ;DW 85                  ; 2 bytes - Parte entera
+    ;DD 12345               ; 4 bytes - Parte decimal
+    ;DB 0                   ; 1 byte - Padding -> Total registro: 70 bytes
 
     ; Estudiante 2: Nota 69.99999 (Reprobado)
-    DB 'Maria$'            ; 6 bytes
-    DB 15 DUP(0)           ; 15 bytes -> Total: 21 bytes
-    DB 'Gomez$'            ; 6 bytes
-    DB 15 DUP(0)           ; 15 bytes -> Total: 21 bytes
-    DB 'Ruiz$'             ; 5 bytes
-    DB 16 DUP(0)           ; 16 bytes -> Total: 21 bytes
-    DW 69                  ; 2 bytes - Parte entera
-    DD 99999               ; 4 bytes - Parte decimal
-    DB 0                   ; 1 byte - Padding -> Total registro: 70 bytes
+    ;DB 'Maria$'            ; 6 bytes
+    ;DB 15 DUP(0)           ; 15 bytes -> Total: 21 bytes
+    ;DB 'Gomez$'            ; 6 bytes
+    ;DB 15 DUP(0)           ; 15 bytes -> Total: 21 bytes
+    ;DB 'Ruiz$'             ; 5 bytes
+    ;DB 16 DUP(0)           ; 16 bytes -> Total: 21 bytes
+    ;DW 69                  ; 2 bytes - Parte entera
+    ;DD 99999               ; 4 bytes - Parte decimal
+    ;DB 0                   ; 1 byte - Padding -> Total registro: 70 bytes
 
     ; Estudiante 3: Nota 95.00000 (Maxima)
-    DB 'Carlos$'           ; 7 bytes
-    DB 14 DUP(0)           ; 14 bytes -> Total: 21 bytes
-    DB 'Sanchez$'          ; 8 bytes
-    DB 13 DUP(0)           ; 13 bytes -> Total: 21 bytes
-    DB 'Diaz$'             ; 5 bytes
-    DB 16 DUP(0)           ; 16 bytes -> Total: 21 bytes
-    DW 95                  ; 2 bytes - Parte entera
-    DD 0                   ; 4 bytes - Parte decimal
-    DB 0                   ; 1 byte - Padding -> Total registro: 70 bytes
+    ;DB 'Carlos$'           ; 7 bytes
+    ;DB 14 DUP(0)           ; 14 bytes -> Total: 21 bytes
+    ;DB 'Sanchez$'          ; 8 bytes
+    ;DB 13 DUP(0)           ; 13 bytes -> Total: 21 bytes
+    ;DB 'Diaz$'             ; 5 bytes
+    ;DB 16 DUP(0)           ; 16 bytes -> Total: 21 bytes
+    ;DW 95                  ; 2 bytes - Parte entera
+    ;DD 0                   ; 4 bytes - Parte decimal
+    ;DB 0                   ; 1 byte - Padding -> Total registro: 70 bytes
 
     ; Estudiante 4: Nota 50.50000 (Minima)
-    DB 'Ana$'              ; 4 bytes
-    DB 17 DUP(0)           ; 17 bytes -> Total: 21 bytes
-    DB 'Martinez$'         ; 9 bytes
-    DB 12 DUP(0)           ; 12 bytes -> Total: 21 bytes
-    DB 'Soto$'             ; 5 bytes
-    DB 16 DUP(0)           ; 16 bytes -> Total: 21 bytes
-    DW 50                  ; 2 bytes - Parte entera
-    DD 50000               ; 4 bytes - Parte decimal
-    DB 0                   ; 1 byte - Padding -> Total registro: 70 bytes
+    ;DB 'Ana$'              ; 4 bytes
+    ;DB 17 DUP(0)           ; 17 bytes -> Total: 21 bytes
+    ;DB 'Martinez$'         ; 9 bytes
+    ;DB 12 DUP(0)           ; 12 bytes -> Total: 21 bytes
+    ;DB 'Soto$'             ; 5 bytes
+    ;DB 16 DUP(0)           ; 16 bytes -> Total: 21 bytes
+    ;DW 50                  ; 2 bytes - Parte entera
+    ;DD 50000               ; 4 bytes - Parte decimal
+    ;DB 0                   ; 1 byte - Padding -> Total registro: 70 bytes
 
     ; Estudiante 5: Nota 70.00000 (Aprobado)
-    DB 'Luis$'             ; 5 bytes
-    DB 16 DUP(0)           ; 16 bytes -> Total: 21 bytes
-    DB 'Hernandez$'        ; 10 bytes
-    DB 11 DUP(0)           ; 11 bytes -> Total: 21 bytes
-    DB 'Vega$'             ; 5 bytes
-    DB 16 DUP(0)           ; 16 bytes -> Total: 21 bytes
-    DW 70                  ; 2 bytes - Parte entera
-    DD 0                   ; 4 bytes - Parte decimal
-    DB 0                   ; 1 byte - Padding -> Total registro: 70 bytes
+    ;DB 'Luis$'             ; 5 bytes
+    ;DB 16 DUP(0)           ; 16 bytes -> Total: 21 bytes
+    ;DB 'Hernandez$'        ; 10 bytes
+    ;DB 11 DUP(0)           ; 11 bytes -> Total: 21 bytes
+    ;DB 'Vega$'             ; 5 bytes
+    ;DB 16 DUP(0)           ; 16 bytes -> Total: 21 bytes
+    ;DW 70                  ; 2 bytes - Parte entera
+    ;DD 0                   ; 4 bytes - Parte decimal
+    ;DB 0                   ; 1 byte - Padding -> Total registro: 70 bytes
 
-; --- VARIABLES PARA ALMACENAR RESULTADOS ESTADÍSTICOS ---
+; --- VARIABLES PARA ALMACENAR RESULTADOS ESTADISTICOS ---
 ; Estructura de almacenamiento para notas:
 ; - Parte entera (DW): Rango 0-100
 ; - Parte decimal (DD): Rango 0-99999
@@ -163,7 +162,7 @@ msgNota         DB ', Nota: $'
 msgSortOK       DB 13, 10, 'Validacion: Ordenamiento correcto.', 13, 10, '$'
 msgSortError    DB 13, 10, 'Error: Ordenamiento incorrecto detectado.', 13, 10, '$'
 
-; --- VARIABLES TEMPORALES PARA CÁLCULOS ---
+; --- VARIABLES TEMPORALES PARA CALCULOS ---
 temp_decimal    DD 0            ; Almacenamiento temporal para cálculos decimales
 
 ; --- VARIABLES PARA EL ALGORITMO SELECTION SORT ---
@@ -188,7 +187,7 @@ NOTA_APROBACION_FRAC DD 0       ; Parte decimal de la nota de aprobación
 DIVISOR_FLOAT       DW 10000    ; Divisor para cálculos decimales (10^4)
 
 ; ============================================================
-;   NOTAS SOBRE MANEJO DE NÚMEROS DECIMALES
+;   NOTAS SOBRE MANEJO DE NUMEROS DECIMALES
 ; ============================================================
 ; El sistema maneja números decimales de la siguiente forma:
 ; 1. La parte entera se almacena en un DW (0-100)
@@ -208,7 +207,7 @@ msgFueraRango  db 13,10,'[ERROR] Indice fuera de rango.',13,10,'$'
 msgResultado   db 13,10,'Estudiante: $'
 msgNotaI       db 13,10,'Nota: $'
 estudiantes    db 0
-msgListaVacia db 13,10,'Lista vacia$',13,10,'$'
+msgListaVacia db 13,10,'Lista vacia $',13,10,'$'
 space         db ' $'
 dot           db '. $'
 
@@ -235,19 +234,20 @@ MainLoop:
     je   Opt4
     cmp  al, 5
     je   Opt5
-    cmp  al, 6
-    je   Opt6
     jmp  MainLoop
 
 Opt1:
     ; Se implementa la funcionalidad de acceder a estudiante
     call Ingresar_Calificaciones
-    jmp  WaitAndReturn
+    jmp  MainLoop
 
 Opt2:
     mov  dx, OFFSET msg2 ;Mostrar estadisticas
     mov  ah, 09h
     int  21h
+    call Lista_EsVacia
+    cmp  al, 1            ; ¿AL == 1?
+    je   MostrarListaVacia ; sí → saltar a MostrarListaVacia
     ; Ejecutar cálculos estadísticos
     call DebugEstudiantes       ; Nueva función de debug
     call DebugDirecto           ; Acceso directo a cada nota
@@ -268,6 +268,10 @@ Opt4:
     mov  dx, OFFSET msg4 ;Ordenar calificaciones
     mov  ah, 09h
     int  21h
+    call Lista_EsVacia
+    cmp  al, 1            ; ¿AL = 1 (vacía)?
+    je   MostrarListaVacia ; sí → saltar a MostrarListaVacia
+     
     mov al, 0           ; 0 = ascendente
     call SortAndDisplay
     mov dx, OFFSET newLine
@@ -287,12 +291,6 @@ Opt5:
     int  21h
     jmp  ExitProgram
 
-Opt6:
-    mov  dx, OFFSET msg6 ;Mostrar todos los estudiantes
-    mov  ah, 09h
-    int  21h
-    call Mostrar_Todos_Estudiantes
-    jmp  WaitAndReturn
 
 WaitAndReturn: ;Esperar tecla y volver al menu
     mov  dx, OFFSET pressAny
@@ -314,6 +312,35 @@ ExitProgram:
     mov  ah, 4Ch
     mov  al, 00h
     int  21h
+
+
+; ---------------------------------------------------------
+; Función: Lista_EsVacia
+; Entrada : variable NumEstudiantesRegistrados (DB)
+; Salida  : AL = 1 si está vacía
+;           AL = 0 si no lo está
+; ---------------------------------------------------------
+Lista_EsVacia PROC
+    mov al, NumEstudiantesRegistrados  ; cargar número de estudiantes
+    cmp al, 0                          ; comparar con 0
+    jne TieneDatos                     ; si no es 0, hay datos
+    mov al, 1                          ; vacía → AL = 1
+    ret
+TieneDatos:
+    mov al, 0                          ; no vacía → AL = 0
+    ret
+Lista_EsVacia ENDP
+
+; ---------------------------------------------------------
+; Función: MostrarListaVacia
+; Muestra mensaje de lista vacía y salta a WaitAndReturn
+; ---------------------------------------------------------
+MostrarListaVacia:
+    mov  dx, OFFSET msgListaVacia ; Mostrar mensaje de lista vacía
+    mov  ah, 09h
+    int  21h
+    jmp  WaitAndReturn    ; Saltar a WaitAndReturn
+
 
 ; ============================================================
 ;   MODULO: MENU
@@ -347,9 +374,6 @@ Menu_Print PROC NEAR
     mov  ah, 09h
     int  21h
 
-    mov  dx, OFFSET MostrarTodos
-    mov  ah, 09h
-    int  21h
 
     mov  dx, OFFSET msgPrompt
     mov  ah, 09h
@@ -405,7 +429,381 @@ WaitEnter:
     ret          
     
     
-ReadWithEnter ENDP
+ReadWithEnter ENDP    
+
+; ============================================================
+;   LEE UNA LINEA COMPLETA DE ENTRADA
+; ============================================================
+ReadInputLine PROC NEAR
+    push bx
+    push cx
+    push dx
+    push si
+    
+    mov si, OFFSET inputBuffer
+    mov cx, 0                    ; Contador de caracteres
+    
+ReadChar:
+    mov ah, 01h                  ; Leer car�cter con eco
+    int 21h
+    
+    cmp al, 13                   ; Verificar Enter
+    je EndInput
+    cmp al, 8                    ; Verificar backspace
+    je HandleBackspace
+    
+    cmp cx, 99                   ; L�mite del buffer
+    jae ReadChar                 ; Ignorar si buffer lleno
+    
+    mov [si], al                 ; Almacenar car�cter
+    inc si
+    inc cx
+    jmp ReadChar
+
+HandleBackspace:
+    cmp cx, 0                    ; Verificar si est� al inicio
+    je ReadChar
+    dec si
+    dec cx
+    mov byte ptr [si], 0         ; Limpiar car�cter
+    
+    ; Tambi�n borrar de la pantalla
+    mov dl, 8                    ; Backspace
+    mov ah, 02h
+    int 21h
+    mov dl, ' '                  ; Espacio
+    int 21h
+    mov dl, 8                    ; Backspace again
+    int 21h
+    
+    jmp ReadChar
+
+EndInput:
+    mov byte ptr [si], 0         ; Terminar con null
+    
+    ; Imprimir nueva l�nea despu�s de la entrada
+    mov dl, 13
+    mov ah, 02h
+    int 21h
+    mov dl, 10
+    int 21h
+    
+    pop si
+    pop dx
+    pop cx
+    pop bx
+    ret
+ReadInputLine ENDP
+
+; ============================================================
+;   PARSE AND STORE STUDENT DATA
+; ============================================================
+ParseAndStoreStudentData PROC NEAR
+    push bx
+    push cx
+    push dx
+    push si
+    push di
+    
+    mov si, OFFSET inputBuffer
+    
+    ; Calcular posici�n en EstudiantesData
+    mov al, [NumEstudiantesRegistrados]
+    xor ah, ah
+    mov bx, TAM_REGISTRO
+    mul bx
+    mov di, OFFSET EstudiantesData
+    add di, ax
+    
+    ; Parse First Name (21 bytes)
+    call ParseFieldToStruct
+    cmp al, 0
+    je ParseError
+    
+    ; Pad remaining bytes with 0
+    mov cx, TAM_NOMBRE
+    sub cx, bx
+    jbe NoPad1
+PadLoop1:
+    mov byte ptr [di], 0
+    inc di
+    loop PadLoop1
+NoPad1:
+    
+    ; Parse Last Name 1 (21 bytes)
+    call ParseFieldToStruct
+    cmp al, 0
+    je ParseError
+    
+    mov cx, TAM_APELLIDO1
+    sub cx, bx
+    jbe NoPad2
+PadLoop2:
+    mov byte ptr [di], 0
+    inc di
+    loop PadLoop2
+NoPad2:
+    
+    ; Parse Last Name 2 (21 bytes)
+    call ParseFieldToStruct
+    cmp al, 0
+    je ParseError
+    
+    mov cx, TAM_APELLIDO2
+    sub cx, bx
+    jbe NoPad3
+PadLoop3:
+    mov byte ptr [di], 0
+    inc di
+    loop PadLoop3
+NoPad3:
+    
+    ; Parse Grade (integer and decimal parts)
+    call ParseGrade
+    cmp al, 0
+    je ParseError
+    
+    mov al, 1                    ; Success
+    jmp ParseDone
+
+ParseError:
+    mov dx, OFFSET msgInvalidFormat
+    mov ah, 09h
+    int 21h
+    mov al, 0                    ; Failure
+
+ParseDone:
+    pop di
+    pop si
+    pop dx
+    pop cx
+    pop bx
+    ret
+ParseAndStoreStudentData ENDP
+
+; Parse a field and store in structure
+ParseFieldToStruct PROC NEAR
+    push cx
+    
+    mov cx, 0                    ; Character counter
+    
+    ; Skip leading spaces
+SkipSpaces:
+    mov al, [si]
+    cmp al, 0                    ; End of input
+    je FieldError
+    cmp al, ' '
+    jne StartField
+    inc si
+    jmp SkipSpaces
+    
+StartField:
+    ; Copy characters until space or end
+CopyChar:
+    mov al, [si]
+    cmp al, 0                    ; End of input
+    je EndField
+    cmp al, ' '                  ; Space delimiter
+    je EndField
+    cmp al, '.'                  ; Decimal point (for grade)
+    je EndField
+    
+    mov [di], al                 ; Store character
+    inc si
+    inc di
+    inc cx
+    cmp cx, 20                   ; Max field length
+    jb CopyChar
+    
+EndField:
+    mov byte ptr [di], '$'       ; Terminate field
+    inc di
+    inc cx
+    mov bx, cx                   ; Return length
+    cmp cx, 0                    ; Check if we got any characters
+    je FieldError
+    
+    mov al, 1                    ; Exito
+    jmp FieldDone
+
+FieldError:
+    mov al, 0                    ; Caso de Error
+
+FieldDone:
+    pop cx
+    ret
+ParseFieldToStruct ENDP
+
+; Parse grade (interpretacion de la parte decimal como entero) - FIX
+ParseGrade PROC NEAR
+    push bx
+    push cx
+    push dx
+    push di
+    
+    ; Saltar a la parte de calificacion
+GradeSkip:
+    mov al, [si]
+    cmp al, 0
+    je GradeError
+    cmp al, ' '
+    jne GradeStart
+    inc si
+    jmp GradeSkip
+    
+GradeStart:
+    ; Parse integer part
+    xor bx, bx                   ; Acumulador de enteros
+    xor cx, cx                   ; Acumulador de decimales
+    xor dx, dx                   ; Contador de digitos decimales
+    
+ParseInteger:
+    mov al, [si]
+    cmp al, 0
+    je GradeEnd
+    cmp al, '.'
+    je ParseDecimal
+    cmp al, ' '
+    je GradeEnd
+    
+    ; Convertir digitos y sumarlos a numeros enteros
+    sub al, '0'
+    jb GradeError
+    cmp al, 9
+    ja GradeError
+    
+    mov ah, 0
+    xchg ax, bx
+    mov dx, 10
+    mul dx
+    add bx, ax
+    inc si
+    jmp ParseInteger
+    
+ParseDecimal:
+    inc si                       ; Saltar el punto "." decimal
+    xor dx, dx                   ; Reinicio del contador de digitos
+    
+ParseDecimalLoop:
+    mov al, [si]
+    cmp al, 0
+    je GradeEnd
+    cmp al, ' '
+    je GradeEnd
+    
+    ; Convertir digito y agregar a decimal
+    sub al, '0'                  ; Convertir ASCII a numero
+    jb GradeError                ;Error, la entrada no es un numero
+    cmp al, 9
+    ja GradeError
+    
+    ; cx = cx * 10 + al
+    mov ah, 0
+    push dx                      ; Guardar contador temporalmente
+    push ax                      ; Guardar digito temporalmente
+    mov ax, cx                   ; Cargar decimal actual
+    mov dx, 10                   ; Multiplicar por 10
+    mul dx                       ; DX:AX = cx * 10
+    mov cx, ax                   ;Guardar resultado
+    pop ax                       ; Restaurar Digito
+    add cx, ax                   ; Annadir digito
+    pop dx                       ; Contar digito procesado
+    inc dx                       ; Contar digito procesado
+    inc si                       ; Siguiente caracter
+    cmp dx, 5                    ; Maximo 5 digitos decimales
+    jb ParseDecimalLoop
+    
+GradeEnd:
+    ; Guardar parte entera (2 bytes)
+    mov [di], bx
+    add di, 2
+    
+    ; Guardar parte decimal (escalar a 5 digitos si es necesario)
+    mov ax, cx
+    cmp dx, 5                    
+    je StoreDecimal
+    
+    ; Escalar a 5 digitos multiplicando por 10^(5-digitos)
+    mov bx, 10
+ScaleLoop:                       ; Base para multiplicar
+    cmp dx, 5                    ;Validacion: Hay 5 digitos?
+    jae StoreDecimal
+    mul bx                       ; AX = AX * 10
+    inc dx                       ; Contar digito agregado
+    jmp ScaleLoop
+    
+StoreDecimal:
+    mov [di], ax                 ; Guardar parte decimal (4 bytes)
+    mov word ptr [di+2], 0       ; ; Parte alta de decimal (max 99999)
+    
+    mov al, 1                    ; Exito
+    jmp GradeDone
+
+GradeError:
+    mov al, 0                    ; Error
+
+GradeDone:
+    pop di
+    pop dx
+    pop cx
+    pop bx
+    ret
+ParseGrade ENDP
+
+; ============================================================
+;   MODULO: INGRESAR CALIFICACIONES 
+; ============================================================
+Ingresar_Calificaciones PROC NEAR
+    push ax
+    push bx
+    push cx
+    push dx
+    push si
+    push di
+
+InputLoop:
+    ; Verifica si ya se registraron 15 estudiantes
+    mov al, [NumEstudiantesRegistrados]
+    cmp al, MAX_ESTUDIANTES
+    jae MaxStudentsReached
+    
+    mov dx, OFFSET msgStudentPrompt
+    mov ah, 09h
+    int 21h
+    
+    ; Leer la linea de entrada
+    call ReadInputLine
+    
+    ; verifica si el usuario quiere volver al menu (con 9)
+    mov si, OFFSET inputBuffer
+    mov al, [si]
+    cmp al, '9'          ; 
+    je ExitToMenu        ; SALIR DIRECTAMENTE AL MENU
+    
+    ; Parse and store the input in EstudiantesData format
+    call ParseAndStoreStudentData
+    cmp al, 0                    ; Comprobar si el an�lisis fue exitoso
+    je InputLoop                 ; Si falla, intentarlo de nuevo
+                                                                                
+    ; Increment student count
+    inc [NumEstudiantesRegistrados]
+    jmp InputLoop
+
+MaxStudentsReached:
+    mov dx, OFFSET msgMaxStudents
+    mov ah, 09h
+    int 21h
+
+ExitToMenu:
+    pop di
+    pop si
+    pop dx
+    pop cx
+    pop bx
+    pop ax
+    ret
+Ingresar_Calificaciones ENDP
+
 
 ; ============================================================
 ;   MODULO: BUSCAR INDICE
@@ -418,12 +816,9 @@ Buscar_Estudiante PROC NEAR
     push dx
     push si
 
-    ; --- Verificar si lista vacía ---
-    mov bx, OFFSET EstudiantesData
-    mov al, [bx]
-    cmp al, 0          ; Si está vacía
-    je ListaVacia
-    cmp al, '$'        ; O si tiene solo terminador
+    ; --- Verificar si lista vacia ---
+    mov al, [NumEstudiantesRegistrados]  ; Usar el contador de estudiantes
+    cmp al, 0                            ; Si es 0, esta vacia
     je ListaVacia
 
     ; --- Pedir índice ---
@@ -436,11 +831,14 @@ Buscar_Estudiante PROC NEAR
     sub al, '0'        ; Convertir de ASCII a valor numérico
     mov bl, al         ; Guardar índice ingresado
 
-    ; Validar rango (1 a 5, ya que hay 5 estudiantes)
+    ; Validar rango (1 a numero real de estudiantes)
     cmp bl, 1
     jb FueraRango
-    cmp bl, 5          ; Máximo 5 estudiantes
+    mov al, [NumEstudiantesRegistrados]  ; Usar contador real
+    xor ah, ah
+    cmp bl, al          ; Comparar con el numero real
     ja FueraRango
+    
 
     ; Calcular desplazamiento al registro del estudiante
     dec bl             ; Índice base 0
@@ -599,296 +997,6 @@ EndPrintNumber:
     ret
 PrintNumber ENDP
 
-; ============================================================
-;   MODULO: INGRESAR CALIFICACIONES
-; ============================================================
-
-Ingresar_Calificaciones PROC NEAR
-    push ax
-    push bx
-    push cx
-    push dx
-    push si
-    push di
-
-InputLoop:
-    ; Verifica si ya se registraron 15 estudiantes
-    mov al, studentCount
-    cmp al, 15
-    jae MaxStudentsReached
-    
-
-    mov dx, OFFSET msgStudentPrompt
-    mov ah, 09h
-    int 21h
-    
-    ; Leer la línea de entrada
-    call ReadInputLine
-    
-    ; varifica si el usuario quiere volver al menu
-    mov si, OFFSET inputBuffer
-    mov al, [si]
-    cmp al, '5'
-    je ExitToMenu
-    
-    ; Parse and store the input
-    call ParseAndStoreStudent
-    cmp al, 0                    ; Check if parsing was successful
-    je InputLoop                 ; If failed, try again
-    
-    ; Increment student count
-    inc studentCount
-    jmp InputLoop
-
-MaxStudentsReached:
-    mov dx, OFFSET msgMaxStudents
-    mov ah, 09h
-    int 21h
-    jmp ExitToMenu
-
-ExitToMenu:
-    pop di
-    pop si
-    pop dx
-    pop cx
-    pop bx
-    pop ax
-    ret
-Ingresar_Calificaciones ENDP
-
-; Read a complete line of input
-ReadInputLine PROC NEAR
-    push bx
-    push cx
-    push dx
-    push si
-    
-    mov si, OFFSET inputBuffer
-    mov cx, 0                    ; Character counter
-    
-ReadChar:
-    mov ah, 01h                  ; Read character with echo
-    int 21h
-    
-    cmp al, 13                   ; Check for Enter
-    je EndInput
-    cmp al, 8                    ; Check for backspace
-    je HandleBackspace
-    
-    cmp cx, 99                   ; Check buffer limit
-    jae ReadChar                 ; Ignore if buffer full
-    
-    mov [si], al                 ; Store character
-    inc si
-    inc cx
-    jmp ReadChar
-
-HandleBackspace:
-    cmp cx, 0                    ; Check if at beginning
-    je ReadChar
-    dec si
-    dec cx
-    mov byte ptr [si], 0         ; Clear character
-    jmp ReadChar
-
-EndInput:
-    mov byte ptr [si], 0         ; Null terminate
-    
-    pop si
-    pop dx
-    pop cx
-    pop bx
-    ret
-ReadInputLine ENDP
-
-; Parse input line and store in tables
-ParseAndStoreStudent PROC NEAR
-    push bx
-    push cx
-    push dx
-    push si
-    push di
-    
-    mov si, OFFSET inputBuffer
-    mov bl, studentCount
-    mov bh, 0
-    
-    ; Calculate base addresses for current student
-    mov ax, 21                   ; 20 chars + 1 terminator per entry
-    mul bx                       ; AX = offset for current student
-    
-    ; Parse FirstName
-    mov di, OFFSET FirstNameTable
-    add di, ax
-    call ParseField
-    cmp al, 0
-    je ParseError
-    
-    ; Parse LastName1  
-    mov di, OFFSET LastNameTable1
-    add di, ax
-    call ParseField
-    cmp al, 0
-    je ParseError
-    
-    ; Parse LastName2
-    mov di, OFFSET LastNameTable2  
-    add di, ax
-    call ParseField
-    cmp al, 0
-    je ParseError
-    
-    ; Parse Note (different size calculation)
-    mov ax, 5                    ; 4 chars + 1 terminator per entry
-    mul bx
-    mov di, OFFSET NotesTable
-    add di, ax
-    call ParseField
-    cmp al, 0
-    je ParseError
-    
-    mov al, 1                    ; Success
-    jmp ParseDone
-
-ParseError:
-    mov dx, OFFSET msgInvalidFormat
-    mov ah, 09h
-    int 21h
-    mov al, 0                    ; Failure
-
-ParseDone:
-    pop di
-    pop si
-    pop dx
-    pop cx
-    pop bx
-    ret
-ParseAndStoreStudent ENDP
-
-; Parse a single field from input (space-delimited)
-ParseField PROC NEAR
-    push bx
-    push cx
-    
-    mov cx, 0                    ; Character counter
-    
-    ; Skip leading spaces
-SkipSpaces:
-    mov al, [si]
-    cmp al, 0                    ; End of input
-    je FieldError
-    cmp al, ' '
-    jne StartField
-    inc si
-    jmp SkipSpaces
-    
-StartField:
-    ; Copy characters until space or end
-CopyChar:
-    mov al, [si]
-    cmp al, 0                    ; End of input
-    je EndField
-    cmp al, ' '                  ; Space delimiter
-    je EndField
-    
-    mov [di], al                 ; Store character
-    inc si
-    inc di
-    inc cx
-    cmp cx, 19                   ; Limit field length (leave room for terminator)
-    jb CopyChar
-    
-EndField:
-    mov byte ptr [di], '$'       ; Terminate field
-    cmp cx, 0                    ; Check if we got any characters
-    je FieldError
-    
-    mov al, 1                    ; Success
-    jmp FieldDone
-
-FieldError:
-    mov al, 0                    ; Failure
-
-FieldDone:
-    pop cx
-    pop bx
-    ret
-ParseField ENDP
-
-; ============================================================
-;   MODULO: MOSTRAR TODOS LOS ESTUDIANTES
-; ============================================================
-
-Mostrar_Todos_Estudiantes PROC NEAR
-    push ax
-    push bx
-    push cx
-    push dx
-    push si
-    push di
-    
-    ; Verifica si hay estudiantes
-    mov al, studentCount
-    cmp al, 0
-    je NoStudents
-    
-    mov cl, al              ; CL = number of students to display
-    mov ch, 0               ; Current student index
-    
-DisplayLoop:
-    cmp ch, cl              ; Check if we've displayed all students
-    jae DisplayDone
-    
-    ; Calculate offset for current student in FirstNameTable
-    mov al, ch
-    mov bl, 21              ; 20 chars + '$' per entry
-    mul bl                  ; AX = offset
-    mov si, OFFSET FirstNameTable
-    add si, ax
-    
-    ; Display first name
-    call DisplayString
-    
-    ; Display space
-    mov dl, ' '
-    mov ah, 02h
-    int 21h
-    
-    ; Calculate offset for current student in NotesTable
-    mov al, ch
-    mov bl, 5               ; 4 chars + '$' per entry
-    mul bl                  ; AX = offset
-    mov si, OFFSET NotesTable
-    add si, ax
-    
-    ; Display note
-    call DisplayString
-    
-    ; Display newline
-    mov dx, OFFSET newline
-    mov ah, 09h
-    int 21h
-    
-    inc ch                  ; Move to next student
-    jmp DisplayLoop
-
-NoStudents:
-    mov dx, OFFSET msgNoStudents
-    mov ah, 09h
-    int 21h
-    jmp DisplayDone
-
-DisplayDone:
-    pop di
-    pop si
-    pop dx
-    pop cx
-    pop bx
-    pop ax
-    ret
-Mostrar_Todos_Estudiantes ENDP
-
-; Helper procedure to display a '$' terminated string;
 
 
 ; ============================================================
@@ -896,7 +1004,7 @@ Mostrar_Todos_Estudiantes ENDP
 ; ============================================================
 
 ; ============================================================
-;   SUBRUTINAS DE CÁLCULO ESTADÍSTICO
+;   SUBRUTINAS DE CÁLCULO ESTADISTICO
 ; ============================================================
 ; Este módulo contiene las siguientes rutinas principales:
 ;
@@ -1074,7 +1182,7 @@ DebugDirecto ENDP
 ; ------------------------------------------------------------
 ; Stats_CalcularMaxMin: Calcula notas máxima y mínima
 ; ------------------------------------------------------------
-; DESCRIPCIÓN:
+; DESCRIPCION:
 ;     Analiza todos los registros de estudiantes para encontrar
 ;     las notas más alta y más baja, considerando tanto la parte
 ;     entera como la decimal de cada nota.
@@ -1199,7 +1307,7 @@ Stats_CalcularMaxMin ENDP
 ; ------------------------------------------------------------
 ; Stats_CalcularPromedio: Calcula el promedio general
 ; ------------------------------------------------------------
-; DESCRIPCIÓN:
+; DESCRIPCION:
 ;     Calcula el promedio de las notas de todos los estudiantes,
 ;     manejando precisión decimal y evitando desbordamiento.
 ;
@@ -1210,11 +1318,11 @@ Stats_CalcularMaxMin ENDP
 ; ALGORITMO:
 ;     1. Suma separada de partes enteras y decimales
 ;     2. Manejo de 32 bits para parte decimal para evitar
-;        pérdida de precisión
+;        pérdida de precision
 ;     3. División del total entre número de estudiantes
 ;     4. Normalización del resultado si es necesario
 ;
-; PRECISIÓN:
+; PRECISION:
 ;     - Mantiene 5 dígitos decimales de precisión
 ;     - Usa división de 32 bits para máxima precisión
 ;
@@ -1284,12 +1392,12 @@ Promedio_End:
 Stats_CalcularPromedio ENDP
 
 ; ------------------------------------------------------------
-; Div32By16: División de precisión extendida
+; Div32By16: Division de precisión extendida
 ; ------------------------------------------------------------
 ; DESCRIPCIÓN:
-;     Implementa división de números de 32 bits entre 16 bits,
+;     Implementa division de numeros de 32 bits entre 16 bits,
 ;     proporcionando resultado de 32 bits. Esta rutina es crítica
-;     para mantener la precisión en cálculos decimales.
+;     para mantener la precision en cálculos decimales.
 ;
 ; ENTRADA:
 ;     DX:AX - Dividendo de 32 bits
@@ -1617,7 +1725,7 @@ ImprimirNum_End:
 ImprimirNumero ENDP
 
 ; ------------------------------------------------------------
-; ImprimirDecimal: Imprime parte decimal (5 dígitos con ceros iniciales)
+; ImprimirDecimal: Imprime parte decimal (5 digitos con ceros iniciales)
 ; Entrada: DX:AX = número decimal a imprimir (máximo 99999)
 ; ------------------------------------------------------------
 ImprimirDecimal PROC
@@ -1660,9 +1768,9 @@ ImprimirDec_Print:
 ImprimirDecimal ENDP
 
 ; ------------------------------------------------------------
-; NormalizeGrade: Normalización de notas
+; NormalizeGrade: Normalizacion de notas
 ; ------------------------------------------------------------
-; DESCRIPCIÓN:
+; DESCRIPCIION:
 ;     Normaliza una nota cuando su parte decimal excede 99999,
 ;     ajustando la parte entera y decimal para mantener la
 ;     consistencia del formato.
@@ -1883,7 +1991,7 @@ SelectionSort ENDP
 ; ------------------------------------------------------------
 ; CompareElements: Compara las notas de dos estudiantes
 ; ------------------------------------------------------------
-; DESCRIPCIÓN:
+; DESCRIPCION:
 ;     Compara las notas de dos estudiantes considerando tanto
 ;     la parte entera como la decimal de manera precisa.
 ;
