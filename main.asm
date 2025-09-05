@@ -467,7 +467,7 @@ HandleBackspace:
     dec cx
     mov byte ptr [si], 0         ; Limpiar car�cter
     
-    ; Tambi�n borrar de la pantalla
+    ; Tambien borrar de la pantalla
     mov dl, 8                    ; Backspace
     mov ah, 02h
     int 21h
@@ -481,7 +481,7 @@ HandleBackspace:
 EndInput:
     mov byte ptr [si], 0         ; Terminar con null
     
-    ; Imprimir nueva l�nea despu�s de la entrada
+    ; Imprimir nueva linea despues de la entrada
     mov dl, 13
     mov ah, 02h
     int 21h
@@ -507,7 +507,7 @@ ParseAndStoreStudentData PROC NEAR
     
     mov si, OFFSET inputBuffer
     
-    ; Calcular posici�n en EstudiantesData
+    ; Calcular posición en EstudiantesData
     mov al, [NumEstudiantesRegistrados]
     xor ah, ah
     mov bx, TAM_REGISTRO
@@ -581,7 +581,10 @@ ParseDone:
     ret
 ParseAndStoreStudentData ENDP
 
-; Parse a field and store in structure
+; ============================================================
+;   Parse a field and store in structure (Name/LastName)
+;   - Only allows A-Z / a-z
+; ============================================================
 ParseFieldToStruct PROC NEAR
     push cx
     
@@ -605,9 +608,23 @@ CopyChar:
     je EndField
     cmp al, ' '                  ; Space delimiter
     je EndField
-    cmp al, '.'                  ; Decimal point (for grade)
-    je EndField
-    
+    cmp al, '.'                  ; Punto (no válido en nombres)
+    je FieldError
+
+    ; Validación: permitir solo letras A-Z / a-z
+    cmp al, 'A'
+    jb FieldError
+    cmp al, 'Z'
+    jbe StoreChar
+    cmp al, 'a'
+    jb FieldError
+    cmp al, 'z'
+    jbe StoreChar
+
+    ; Si no está en rango → error
+    jmp FieldError
+
+StoreChar:
     mov [di], al                 ; Store character
     inc si
     inc di
@@ -623,7 +640,7 @@ EndField:
     cmp cx, 0                    ; Check if we got any characters
     je FieldError
     
-    mov al, 1                    ; Exito
+    mov al, 1                    ; Éxito
     jmp FieldDone
 
 FieldError:
@@ -634,14 +651,17 @@ FieldDone:
     ret
 ParseFieldToStruct ENDP
 
-; Parse grade (interpretacion de la parte decimal como entero) - FIX
+; ============================================================
+;   Parse grade (integer + optional decimal part)
+;   - If no decimals → defaults to .00
+; ============================================================
 ParseGrade PROC NEAR
     push bx
     push cx
     push dx
     push di
     
-    ; Saltar a la parte de calificacion
+    ; Saltar a la parte de calificación
 GradeSkip:
     mov al, [si]
     cmp al, 0
@@ -655,7 +675,7 @@ GradeStart:
     ; Parse integer part
     xor bx, bx                   ; Acumulador de enteros
     xor cx, cx                   ; Acumulador de decimales
-    xor dx, dx                   ; Contador de digitos decimales
+    xor dx, dx                   ; Contador de dígitos decimales
     
 ParseInteger:
     mov al, [si]
@@ -666,7 +686,7 @@ ParseInteger:
     cmp al, ' '
     je GradeEnd
     
-    ; Convertir digitos y sumarlos a numeros enteros
+    ; Convertir dígitos a número
     sub al, '0'
     jb GradeError
     cmp al, 9
@@ -681,8 +701,8 @@ ParseInteger:
     jmp ParseInteger
     
 ParseDecimal:
-    inc si                       ; Saltar el punto "." decimal
-    xor dx, dx                   ; Reinicio del contador de digitos
+    inc si                       ; Saltar el punto "."
+    xor dx, dx                   ; Reinicio del contador de decimales
     
 ParseDecimalLoop:
     mov al, [si]
@@ -691,26 +711,25 @@ ParseDecimalLoop:
     cmp al, ' '
     je GradeEnd
     
-    ; Convertir digito y agregar a decimal
-    sub al, '0'                  ; Convertir ASCII a numero
-    jb GradeError                ;Error, la entrada no es un numero
+    ; Convertir dígito
+    sub al, '0'
+    jb GradeError
     cmp al, 9
     ja GradeError
     
-    ; cx = cx * 10 + al
     mov ah, 0
-    push dx                      ; Guardar contador temporalmente
-    push ax                      ; Guardar digito temporalmente
-    mov ax, cx                   ; Cargar decimal actual
-    mov dx, 10                   ; Multiplicar por 10
-    mul dx                       ; DX:AX = cx * 10
-    mov cx, ax                   ;Guardar resultado
-    pop ax                       ; Restaurar Digito
-    add cx, ax                   ; Annadir digito
-    pop dx                       ; Contar digito procesado
-    inc dx                       ; Contar digito procesado
-    inc si                       ; Siguiente caracter
-    cmp dx, 5                    ; Maximo 5 digitos decimales
+    push dx
+    push ax
+    mov ax, cx
+    mov dx, 10
+    mul dx
+    mov cx, ax
+    pop ax
+    add cx, ax
+    pop dx
+    inc dx
+    inc si
+    cmp dx, 5                    ; Max 5 dígitos decimales
     jb ParseDecimalLoop
     
 GradeEnd:
@@ -718,25 +737,31 @@ GradeEnd:
     mov [di], bx
     add di, 2
     
-    ; Guardar parte decimal (escalar a 5 digitos si es necesario)
+    ; Si no se ingresó decimal → 00
+    cmp dx, 0
+    jne HasDecimals
+
+    mov ax, 0
+    jmp StoreDecimal
+
+HasDecimals:
     mov ax, cx
     cmp dx, 5                    
     je StoreDecimal
-    
-    ; Escalar a 5 digitos multiplicando por 10^(5-digitos)
+
+    ; Escalar a 5 dígitos
     mov bx, 10
-ScaleLoop:                       ; Base para multiplicar
-    cmp dx, 5                    ;Validacion: Hay 5 digitos?
+ScaleLoop:
+    cmp dx, 5
     jae StoreDecimal
-    mul bx                       ; AX = AX * 10
-    inc dx                       ; Contar digito agregado
+    mul bx
+    inc dx
     jmp ScaleLoop
     
 StoreDecimal:
     mov [di], ax                 ; Guardar parte decimal (4 bytes)
-    mov word ptr [di+2], 0       ; ; Parte alta de decimal (max 99999)
-    
-    mov al, 1                    ; Exito
+    mov word ptr [di+2], 0       
+    mov al, 1                    ; Éxito
     jmp GradeDone
 
 GradeError:
@@ -749,6 +774,7 @@ GradeDone:
     pop bx
     ret
 ParseGrade ENDP
+
 
 ; ============================================================
 ;   MODULO: INGRESAR CALIFICACIONES 
